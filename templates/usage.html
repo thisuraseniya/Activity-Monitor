@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>Activity Monitor</title>
+        <link rel="icon" type="image/ico" href="{{ url_for('static', filename='favicon.ico' ) }}">
+
+
+        <!-- Custom fonts for this template-->
+        <link href="{{ url_for('static', filename='all.min.css' ) }}" rel="stylesheet" type="text/css">
+
+
+        <!-- Custom styles for this template-->
+        <link href="{{ url_for('static', filename='sb-admin.css' ) }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='toggle.css' ) }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='offline.css' ) }}" rel="stylesheet">
+        <link href="{{ url_for('static', filename='vis.css' ) }}" rel="stylesheet" type="text/css" />
+    </head>
+
+    <body id="page-top">
+        <div class="overlay" id="overlay">
+            <div class="overlay-text">
+                <div class="spinner-grow text-danger" style="width: 3rem; height: 3rem;" role="status">
+                </div>
+                <br>
+                <p class="text-danger h5">Reconnecting with Activity Monitor ...</p>
+            </div>
+        </div>
+
+        <nav class="navbar navbar-expand navbar-dark bg-dark fixed-top justify-content-between">
+
+            <a class="navbar-brand mr-1" href="../"><img src="{{ url_for('static', filename='favicon.ico' ) }}" height="30px" > Activity Monitor
+                <span id="running_spinner" data-toggle="tooltip" data-placement="right" title="Running" class="spinner-grow spinner-grow-sm text-success" role="status" aria-hidden="true" style="margin-bottom: 3px; display: none;"></span>
+            </a>
+            <!-- Navbar -->
+            <div class="h4 text-white">{%  if date %}Date - {{ date }}{% endif %}</div>
+            <div class="align-middle">
+                <div class="row">
+                    <div class="text-white" style="margin-top: 2px; margin-right: 10px">Auto Refresh</div>
+                    <div class="toggle-btn {% if refresh == 1 %}active{% endif %}">
+                      <input type="checkbox" {% if refresh == 1 %}checked{% endif %} class="cb-value" />
+                    <span class="round-btn"></span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div id="wrapper">
+
+
+            <!-- Sidebar -->
+            <ul class="sidebar navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% if date %}{{ '../dash/' + date }}{% endif %}">
+                        <i class="fas fa-fw fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li> 
+                {% if date %}
+                <div id="navs">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="../usage/{{date}}" style="color:#007bff">
+                            <i class="fas fa-fw fa-chart-area"></i>
+                            <span>App Usage</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../statistics/{{date}}" style="color:#ff7f0e">
+                            <i class="fas fa-fw fa-chart-bar"></i>
+                            <span>Statistics</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../windows/{{date}}" style="color:#dc3545">
+                            <i class="fas fa-fw fa-window-restore"></i>
+                            <span>Windows</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../screenshots/{{date}}" style="color:#28a745">
+                            <i class="fas fa-fw fa-desktop"></i>
+                            <span>Screenshots</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="../keystrokes/{{date}}" style="color:#ffc107">
+                            <i class="fas fa-fw fa-keyboard"></i>
+                            <span>Keystrokes</span></a>
+                    </li>
+                </div>
+                {% endif %}
+            </ul>
+
+            <div id="content-wrapper">
+                <div class="container-fluid">
+
+                    <!-- Breadcrumbs-->
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="../">Activity Monitor</a>
+                        </li>
+                        <li class="breadcrumb-item active">App Usage</li>
+                    </ol>
+
+
+
+                    <div class="row mb-3">
+                        <div class="col-lg-8">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <i class="fas fa-clock"></i>
+                                    App usage times
+                                </div>
+                                <div class="card-body" id="bar-chart">
+                                    {% if no_data == 1 %}<center class="small text-muted"><i class="fas fa-times-circle text-danger"></i> No data to be displayed</center>{% endif %}
+                                </div>
+                                <div class="card-footer small text-muted update"></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <i class="fas fa-chart-pie"></i>
+                                    Usage Distribution</div>
+                                <div class="card-body" id="pie-chart">
+                                    {% if no_data == 1 %}<center class="small text-muted"><i class="fas fa-times-circle text-danger"></i> No data to be displayed</center>{% endif %}
+                                </div>
+                                <div class="card-footer small text-muted update"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <i class="fas fa-stream"></i>
+                                    Usage Timeline
+                                </div>
+                                <div class="card-body" id="timeline-chart">
+                                    {% if no_data == 1 %}<center class="small text-muted"><i class="fas fa-times-circle text-danger"></i> No data to be displayed</center>{% endif %}
+                                </div>
+                                <div class="card-footer small text-muted update"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <i class="fas fa-stream"></i>
+                                    Attention Timeline
+                                </div>
+                                <div class="card-body" id="eye-timeline-chart">
+                                    {% if no_data == 1 %}<center class="small text-muted"><i class="fas fa-times-circle text-danger"></i> No data to be displayed</center>{% endif %}
+                                </div>
+                                <div class="card-footer small text-muted update"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <i class="fas fa-stream"></i>
+                                    Attention Timeline
+                                </div>
+                                <div class="card-body" id="mytimeline">
+
+                                </div>
+                                <div class="card-footer small text-muted update"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                
+                <!-- /.container-fluid -->
+
+                <!-- Sticky Footer -->
+                <footer class="sticky-footer">
+                    <div class="container my-auto">
+                        <div class="copyright text-center my-auto">
+                            <span>Copyright © Activity Monitor - 2019</span>
+                        </div>
+                    </div>
+                </footer>
+
+            </div>
+            <!-- /.content-wrapper -->
+
+        </div>
+        <!-- /#wrapper -->
+
+
+
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+
+        <!-- Bootstrap core JavaScript-->
+        <script src="{{ url_for('static', filename='jquery.min.js' ) }}"></script>
+        <script src="{{ url_for('static', filename='bootstrap.bundle.min.js' ) }}"></script>
+
+        <!-- Core plugin JavaScript-->
+        <script src="{{ url_for('static', filename='jquery.easing.min.js' ) }}"></script>
+
+        <!-- Custom scripts for all pages-->
+        <script src="{{ url_for('static', filename='sb-admin.min.js' ) }}"></script>
+        <script src="{{ url_for('static', filename='vis.min.js' ) }}"></script>
+
+        <!-- Page level plugin JavaScript-->
+        <script src="{{ url_for('static', filename='apexcharts.js' ) }}"></script>
+
+
+
+
+        <script>
+
+            {% if date %}           
+            $('#navs').css('display', 'block');
+            {% endif %}
+
+            var d = new Date(2019, 2 , 25 , 12 , 50 , 14, 5 );
+
+            {% if no_data == 0 %}
+
+/* ============== APEX TIMELINE CHART ============== */
+
+            function make_entry(name, value){
+                return {
+                    name: name,
+                    data: [value]
+                }
+            }
+              
+            var options = {
+                chart: {
+                    height: 200,
+                    type: 'bar',
+                    stacked: true,
+                    stackType: '100%'
+                },
+                colors: [
+                    {% if timeline_colors %}
+                    {% for color in timeline_colors %}
+                        '{{ color }}',
+                    {% endfor %}
+                    {% endif %}
+                ],
+                plotOptions: {
+                    bar: {
+                        horizontal: true                        
+                    },
+                },
+                stroke: {
+                    width: 0,
+                    colors: ['#ffffff']
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                series: [
+                    {% if timeline %}                       
+                    {% for record in timeline %}
+                        make_entry(
+                        {% for element in record %}
+                            "{{ element }}",
+                        {% endfor %} 
+                        ),
+                    {% endfor %}                       
+                    {% endif %}
+
+                    ],
+               
+                xaxis: {
+                    categories: ['{{date}}'],
+                    labels: {
+                        formatter: function(val) {
+                            var val = Math.round( val / 4.16666666666 * 100 )/ 100;
+                            switch(val) {
+                                case 0: return "12am"; break;
+                                case 1: return "1am"; break;
+                                case 2: return "2am"; break;
+                                case 3: return "3am"; break;
+                                case 4: return "4am"; break;
+                                case 5: return "5am"; break;
+                                case 6: return "6am"; break;
+                                case 7: return "7am"; break;
+                                case 8: return "8am"; break;
+                                case 9: return "9am"; break;
+                                case 10: return "10am"; break;
+                                case 11: return "11am"; break;
+                                case 12: return "12pm"; break;
+                                case 13: return "1pm"; break;
+                                case 14: return "2pm"; break;
+                                case 15: return "3pm"; break;
+                                case 16: return "4pm"; break;
+                                case 17: return "5pm"; break;
+                                case 18: return "6pm"; break;
+                                case 19: return "7pm"; break;
+                                case 20: return "8pm"; break;
+                                case 21: return "9pm"; break;
+                                case 22: return "10pm"; break;
+                                case 23: return "11pm"; break;
+                                default: return val;
+                            }
+                        }
+
+                    },
+                    tickAmount: 24
+                },
+                yaxis: {
+                    show: false,
+                     labels: {
+                         show: false,
+                     }
+                },
+                tooltip: {
+                    x: {
+                        show: false,
+                        formatter: "dd",
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return convert_minutes(val);
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1,
+                },
+                legend: {
+                    show: false,
+                    position: 'right',
+                    horizontalAlign: 'center',
+                    offsetY: 20,
+                    onItemClick: {
+                        toggleDataSeries: false
+                    },
+
+                }
+
+            };
+
+            var chart = new ApexCharts(
+                document.querySelector("#timeline-chart"),
+                options
+            );
+
+            chart.render();
+
+
+/* ============== APEX TIMELINE CHART ============== */
+
+            function make_entry(name, value){
+                return {
+                    name: name,
+                    data: [value]
+                }
+            }
+
+            var options = {
+                chart: {
+                    height: 200,
+                    type: 'bar',
+                    stacked: true,
+                    stackType: '100%'
+                },
+                colors: [
+                    {% if eye_timeline_colors %}
+                    {% for color in eye_timeline_colors %}
+                        '{{ color }}',
+                    {% endfor %}
+                    {% endif %}
+                ],
+                plotOptions: {
+                    bar: {
+                        horizontal: true
+                    },
+                },
+                stroke: {
+                    width: 0,
+                    colors: ['#ffffff']
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                series: [
+                    {% if eye_timeline %}
+                    {% for record in eye_timeline %}
+                        make_entry(
+                        {% for element in record %}
+                            "{{ element }}",
+                        {% endfor %}
+                        ),
+                    {% endfor %}
+                    {% endif %}
+
+                    ],
+
+                xaxis: {
+                    categories: ['{{date}}'],
+                    labels: {
+                        formatter: function(val) {
+                            var val = Math.round( val / 4.16666666666 * 100 )/ 100;
+                            switch(val) {
+                                case 0: return "12am"; break;
+                                case 1: return "1am"; break;
+                                case 2: return "2am"; break;
+                                case 3: return "3am"; break;
+                                case 4: return "4am"; break;
+                                case 5: return "5am"; break;
+                                case 6: return "6am"; break;
+                                case 7: return "7am"; break;
+                                case 8: return "8am"; break;
+                                case 9: return "9am"; break;
+                                case 10: return "10am"; break;
+                                case 11: return "11am"; break;
+                                case 12: return "12pm"; break;
+                                case 13: return "1pm"; break;
+                                case 14: return "2pm"; break;
+                                case 15: return "3pm"; break;
+                                case 16: return "4pm"; break;
+                                case 17: return "5pm"; break;
+                                case 18: return "6pm"; break;
+                                case 19: return "7pm"; break;
+                                case 20: return "8pm"; break;
+                                case 21: return "9pm"; break;
+                                case 22: return "10pm"; break;
+                                case 23: return "11pm"; break;
+                                default: return val;
+                            }
+                        }
+
+                    },
+                    tickAmount: 24
+                },
+                yaxis: {
+                    show: false,
+                     labels: {
+                         show: false,
+                     }
+                },
+                tooltip: {
+                    x: {
+                        show: false,
+                        formatter: "dd",
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return convert_minutes(val);
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1,
+                },
+                legend: {
+                    show: false,
+                    position: 'right',
+                    horizontalAlign: 'center',
+                    offsetY: 20,
+                    onItemClick: {
+                        toggleDataSeries: false
+                    },
+
+                }
+
+            };
+
+            var chart = new ApexCharts(
+                document.querySelector("#eye-timeline-chart"),
+                options
+            );
+
+            chart.render();
+
+
+/* ======================= APEX BAR CHART ====================== */
+
+        var colors = [
+            {% for app in app_usage %}
+                '{{ apps_colors[app] }}',
+            {% endfor %}
+        ];
+        var options = {
+            chart: {
+                height: 350,
+                type: 'bar',
+                events: {
+                    click: function(chart, w, e) {
+                        console.log(chart, w, e )
+                    }
+                },
+            },
+            colors: colors,
+            tooltip: {
+                x: {
+                    show: true,
+                    formatter: "dd",
+                    },
+                y: {
+                    formatter: function(val) {
+                        return convert_minutes(val);
+                    }
+                },
+            },
+            plotOptions: {
+                bar: {
+                    columnWidth: '75%',
+                    distributed: true,
+
+                    dataLabels: {
+                        position: 'top', // top, center, bottom
+                    },
+                }
+            },
+            dataLabels: {
+                enabled: false,
+                formatter: function (val) {
+                    return Math.round(val * 100)/100;
+                },
+                offsetY: -15,
+                style: {
+                    fontSize: '10px',
+                    colors: ["#000000"]
+                }
+            },
+
+            series: [{
+                name: [
+                    'Usage'
+                ],
+                data: [
+                    {% for app in app_usage %}
+                        {{ app_usage[app] }},
+                    {% endfor %}
+                ]
+            }],
+            xaxis: {
+                categories: [
+                    {% for app in app_usage %}
+                        '{{ app }}',
+                    {% endfor %}
+                ],
+                labels: {
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: '"Segoe UI", Roboto, "Helvetica Neue"',
+                    },
+                    rotate: -45,
+                    trim: false,
+                }
+            },
+            yaxis: {
+                tickAmount: 4,
+                decimalsInFloat: 1,
+                title: {
+                    text : 'Duration (Minutes)',
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: '"Segoe UI", Roboto, "Helvetica Neue"',
+                    }
+                },
+                labels: {
+                    offsetY: 0,
+                }
+            },
+        };
+
+        var bar = new ApexCharts(
+            document.querySelector("#bar-chart"),
+            options
+        );
+        bar.render();
+
+/* ======================= APEX PIE CHART ============================ */
+
+        var options = {
+            chart: {
+                width: '100%',
+                height: 350,
+                type: 'pie',
+            },
+            colors: colors,
+            labels: [
+                {% if app_usage %}
+                {% for key in app_usage %}
+                    '{{ key }}',
+                {% endfor %}
+                {% endif %}
+            ],
+            series: [
+                {% if app_usage %}
+                {% for key in app_usage %}
+                    {{ app_usage[key] }} ,
+                {% endfor %}
+                {% endif %}
+            ],
+            legend: {
+                show: false,
+                position: 'bottom'
+            },
+            dataLabels: {
+                enabled: true,
+                dropShadow: {
+                    enabled: false
+                },
+                formatter: function (val) {
+                    if (val >= 5) {
+                        return  val.toFixed(1) + "%";
+                    }
+                    else {
+                        return '';
+                    }
+
+                },
+            },
+            tooltip: {
+                enabled: true,
+                fillSeriesColor: false,
+                theme: 'light',
+                y: {
+                    formatter: function(value) {
+                      return (value/{{ total_time }} * 100).toFixed(1) + '%';
+                    }
+                }
+            }
+
+        };
+
+        var chart = new ApexCharts(
+            document.querySelector("#pie-chart"),
+            options
+        );
+
+        chart.render();
+
+
+/* ======= END PIE CHART ========= */
+            {% endif %}
+            
+        </script>
+
+        <script>
+            var today = new Date();
+            var date = today.getFullYear()+'-'+("0" + (today.getMonth() + 1)).slice(-2)+'-'+ ("0" + today.getDate()).slice(-2) ;
+            $('.update').html("Last updated on " + date + " at " + today.toString().split(" ")[4]);
+        </script>
+
+        <script>
+            $('.cb-value').click(function() {
+                var mainParent = $(this).parent('.toggle-btn');
+
+                if($(mainParent).find('input.cb-value').is(':checked')) {
+                    $(mainParent).addClass('active');
+                    $.ajax({
+                        url:"/tracker/refresh",
+                        method:"POST",
+                        data:{},
+                        success:function(){
+                            window.location.reload();
+                        }
+                    });
+                }
+                else {
+                    $(mainParent).removeClass('active');
+                    $.ajax({
+                        url:"/tracker/refresh",
+                        method:"POST",
+                        data:{},
+                        success:function(){
+                            window.location.reload();
+                        }
+                    });
+                }
+            });
+            {% if date %}
+            $('#navs').css('display', 'block');
+            {% endif %}
+
+            {% if refresh == 1 %}
+            var time = new Date().getTime();
+            $(document.body).bind("mousemove keypress", function(e) {
+                time = new Date().getTime();
+            });
+
+            function refresh() {
+                if(new Date().getTime() - time >= 30000)
+                    window.location.reload();
+                else
+                    setTimeout(refresh, 1000);
+            }
+
+            setTimeout(refresh, 1000);
+        {% endif %}
+
+    window.setInterval(function(){
+        if (document.hasFocus()) {
+            $.ajax({
+                url:"/tracker/isRunning",
+                method:"POST",
+                data:{},
+                success:function(response){
+                    console.log(response);
+                    $('#overlay').css('display', 'none');
+                    if (response == '1') {
+                        $('#running_spinner').css('display', 'inline-block');
+                    }
+                    else if (response == '0'){
+                        $('#running_spinner').css('display', 'none');
+                    }
+                },
+                error: function() {
+                    console.log("Error");
+                    $('#overlay').css('display', 'block');
+                }
+            });
+        }
+    }, 3000);
+
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
+
+        function convert_minutes(val) {
+            var hours = (val / 60);
+            var rhours = Math.floor(hours);
+            var minutes = (hours - rhours) * 60;
+            var rminutes = Math.floor(minutes);
+            var seconds = (minutes - rminutes) * 60;
+            var rseconds = Math.round(seconds);
+            var output = '';
+            if (rhours != 0){
+                if (rhours > 1){
+                    output += rhours + ' hours ';
+                }
+                else {
+                    output += rhours + ' hour '
+                }
+            }
+            if (rminutes != 0){
+                if (rminutes > 1){
+                    output += rminutes + ' minutes ';
+                }
+                else {
+                    output += rminutes + ' minute '
+                }
+            }
+            if (rhours == 0){
+                if (rseconds > 1){
+                    output += rseconds + ' seconds';
+                }
+                else {
+                    output += rseconds + ' second'
+                }
+            }
+            return output;
+        }
+        </script>
+
+        <script type="text/javascript">
+            function add_entry(id, content, start, end){
+                return {
+                    id: id,
+                    content: content,
+                    start: start,
+                    end: end
+                }
+            }
+            var container = document.getElementById('mytimeline');
+            var data = [
+                {% if new_timeline %}
+                {% for n_record in new_timeline %}
+                    add_entry(
+                    {% for n_element in n_record %}
+                        "{{ n_element }}",
+                    {% endfor %}
+                    ),
+                {% endfor %}
+                {% endif %}
+             ];
+            var options = {
+
+
+            };
+
+
+            var timeline = new vis.Timeline(container, data, options);
+        </script>
+
+      
+    </body>
+
+</html>
+
+{##1 - apps#}
+{##2 - inactive#}

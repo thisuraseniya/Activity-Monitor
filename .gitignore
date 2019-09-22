@@ -1,0 +1,7 @@
+
+.vscode/settings.json
+.idea
+__pycache__
+build
+dist
+Activity Monitor.exe
