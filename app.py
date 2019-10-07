@@ -467,14 +467,9 @@ def tracker(command):
     elif command == "url":
         url_rec = request.form['url']
         youtube_paused = request.form['paused']
-        if youtube_paused == "":
-            youtube_paused = "Not youtube"
-        elif youtube_paused == "true":
-            youtube_paused = "Youtube is paused"
-        elif youtube_paused == "false":
-            youtube_paused = "Youtube is playing"
-        print(url_rec, youtube_paused)
+        has_youtube = request.form['video']
         activity_tracker.pass_to_url_grabber(url_rec)
+        activity_tracker.pass_to_video_monitor(has_youtube)
         return 'thanks'
 
     else:

@@ -4,8 +4,11 @@ import threading
 import sqlite3
 import datetime
 
+FACE = 0
+
 
 def main(db_path):
+    global FACE
     faceCascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
     eyeCascade = cv2.CascadeClassifier('haarcascade_eye.xml')
     vs = cv2.VideoCapture(0)
@@ -29,15 +32,16 @@ def main(db_path):
         if faces != ():
             print("Face Detected")
             face_detected = 1
+            FACE = 1
         else:
-            print("No face")
+            # print("No face")
+            FACE = 0
             pass
 
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
             crop_img = frame[y:y + h, x:x + w]
             eyes = eyeCascade.detectMultiScale(crop_img, 1.3, 5)
-            print(eyes)
 
             if eyes != ():
                 eyes_detected = 1
@@ -47,9 +51,6 @@ def main(db_path):
             else:
                 print("No eyes")
                 pass
-
-        # cv2.imshow("cropped", crop_img)
-        # cv2.imshow("Video", frame)
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):

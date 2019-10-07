@@ -13,6 +13,7 @@ import storage_watcher
 import key_log
 import ctypes
 import url_grabber_new
+import video_monitor
 # import url_grabber
 import eye_tracker
 
@@ -122,6 +123,7 @@ def create_database():
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS exclude_apps ( app_name TEXT PRIMARY KEY )''')
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS eye_tracker ( id INTEGER PRIMARY KEY, d TEXT, t TEXT, no_video INTEGER, face INTEGER, eyes INTEGER)''')
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS url_data ( id INTEGER PRIMARY KEY, url TEXT, start_t TEXT, end_t TEXT, t INTEGER, d TEXT)''')
+        my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS video_monitor ( id INTEGER PRIMARY KEY, d TEXT, t TEXT )''')
         connection_ini.commit()
         print("====== CREATING DATABASE COMPLETE")
     return
@@ -363,6 +365,17 @@ def pass_to_url_grabber(url_rec):
     return
 
 
+def pass_to_video_monitor(has_youtube):
+    global running
+    if running:
+        if has_youtube != "":
+            yt = has_youtube
+        else:
+            yt = 0
+        video_monitor.set_youtube(yt)
+
+
+
 # Start App
 def start():
     global kill, running, db_path
@@ -377,7 +390,7 @@ def start():
     # threading.Thread(name="mouse thread", target=mouse_listen, args=()).start()
     threading.Thread(name="per second tracker", target=per_sec_track, args=(kill,)).start()
     threading.Thread(name="url flush thread", target=url_grabber_new.flush_data, args=(kill,)).start()
-    threading.Thread(name="eye tracker thread", target=eye_tracker.timed_runs, args=(kill, db_path)).start()
+    threading.Thread(name="eye tracker thread", target=video_monitor.timed_runs, args=(kill, db_path)).start()
     running = 1
     return
 
