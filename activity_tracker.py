@@ -14,8 +14,7 @@ import key_log
 import ctypes
 import url_grabber_new
 import video_monitor
-# import url_grabber
-import eye_tracker
+
 
 hllDll = ctypes.WinDLL("User32.dll")
 VK_CAPITAL = 0x14
@@ -85,6 +84,8 @@ m_listener = ''
 k_listener = ''
 interval = 180
 running = 0
+BROWSER_FLAG = 0
+SCROLLED = 0
 characters = {'`': '~', '1': '!', '2': '@', '3': '#', '4': '$', '5': '%', '6': '^', '7': '&', '8': '*', '9': '(', '0': ')', '-': '_', '=': '+', '[': '{', ']': '}', ';': ':', ',': '<', '.': '>', '/': '?'}
 exclude_processes = ['searchui.exe', 'lockapp.exe']
 db_path = os.path.expanduser("~") + "\\Documents\\Activity Monitor\\Database\\tracker.db"
@@ -138,7 +139,7 @@ def persistent(kill_flag):
             time_loop = 5
             connection = sqlite3.connect(db_path)
             my_cursor = connection.cursor()
-            program_name, process, window = names_gen.find_app_name()
+            program_name, process, window, browser_flag = names_gen.find_app_name()
 
             if program_name == '' or program_name == 'Task Switching':
                 program_name = "Explorer"
@@ -177,17 +178,31 @@ def screen_shot(ss_name):
     return
 
 
-# Actual tracking function
-# def track(x=0, y=0):
+def video_monitor_main(kill_flag):
+    global BROWSER_FLAG, db_path, SCROLLED
+    time_loop = 60
+    while not kill_flag.isSet():
+        if SCROLLED == 0 and BROWSER_FLAG:
+            if time_loop % 60 == 0:
+                time_loop = 5
+                threading.Thread(name="video monitor", target=video_monitor.run_video_monitor, args=(db_path,)).start()
+            else:
+                time_loop += 5
+            time.sleep(5)
+        else:
+            time.sleep(1)
+
 
 def track():
     try:
-        global prev_window, exclude_processes, prev_window_track
+        global prev_window, exclude_processes, prev_window_track, BROWSER_FLAG, db_path
 
         connection = sqlite3.connect(db_path)
         my_cursor = connection.cursor()
 
-        program_name, process, window = names_gen.find_app_name()
+        program_name, process, window, BROWSER_FLAG = names_gen.find_app_name()
+
+        print("FLAG ", BROWSER_FLAG)
         prev_window = window
 
         d = datetime.datetime.now()
@@ -271,28 +286,29 @@ def folder(kill_flag):
 
 # Mouse on move
 def on_move(x, y):
-    compare_windows()
     return
 
 
 # Mouse on click
 def on_click(x, y, button, pressed):
-    compare_windows()
+    global SCROLLED
+    SCROLLED = 0
     return
 
 
 # Mouse on scroll
 def on_scroll(x, y, dx, dy):
-    compare_windows()
+    global SCROLLED
+    SCROLLED = 1
     return
 
 
 # Keyboard button on release
 def on_release(x):
-    global shift_pressed, characters, ctrl_pressed, db_path, options, exclude_processes
-
+    global shift_pressed, characters, ctrl_pressed, db_path, options, exclude_processes, SCROLLED
+    SCROLLED = 0
     compare_windows()
-    program_name, process, window = names_gen.find_app_name()
+    program_name, process, window, browser_flag = names_gen.find_app_name()
 
     if options['disable_keylog'] == '0' and process != 'Excluded App':
         key_released = str(x).replace("'", "")
@@ -375,7 +391,6 @@ def pass_to_video_monitor(has_youtube):
         video_monitor.set_youtube(yt)
 
 
-
 # Start App
 def start():
     global kill, running, db_path
@@ -387,10 +402,12 @@ def start():
     threading.Thread(name="persistent thread", target=persistent, args=(kill,)).start()
     threading.Thread(name="storage watcher", target=storage_watcher.start, args=(kill, db_path,)).start()
     threading.Thread(name="kb thread", target=kb_listen, args=()).start()
-    # threading.Thread(name="mouse thread", target=mouse_listen, args=()).start()
+    threading.Thread(name="mouse thread", target=mouse_listen, args=()).start()
     threading.Thread(name="per second tracker", target=per_sec_track, args=(kill,)).start()
     threading.Thread(name="url flush thread", target=url_grabber_new.flush_data, args=(kill,)).start()
-    threading.Thread(name="eye tracker thread", target=video_monitor.timed_runs, args=(kill, db_path)).start()
+    threading.Thread(name="eye tracker thread", target=video_monitor .run_eye_tracker, args=(kill, db_path,)).start()
+    threading.Thread(name="eye tracker thread", target=video_monitor_main, args=(kill,)).start()
+
     running = 1
     return
 

@@ -22,6 +22,8 @@ def find_app_name():
         'Startmenuexperiencehost': 'Explorer'
     }
 
+    browsers = ['chrome.exe', 'firefox.exe', 'msedge.exe', 'iexplore.exe', 'opera.exe']
+
     window_object = win32gui.GetForegroundWindow()
     window_original = win32gui.GetWindowText(window_object)
     window_original = window_original.replace("'", "")
@@ -50,7 +52,12 @@ def find_app_name():
         app_name = "Excluded App"
         window_original = "Excluded App"
 
-    return app_name, process_name, window_original
+    if process_name in browsers:
+        browser_flag = 1
+    else:
+        browser_flag = 0
+
+    return app_name, process_name, window_original, browser_flag
 
 
 
