@@ -14,6 +14,7 @@ import time
 import logging
 import names_gen
 import psutil
+
 # import url_grabber
 
 try:
@@ -27,7 +28,6 @@ log.disabled = True
 absolute_path = activity_tracker.absolute_path
 db_path = activity_tracker.db_path
 ss_path = activity_tracker.ss_path
-
 
 # ========== CHECK IF ALREADY RUNNING ================
 
@@ -58,13 +58,14 @@ options = {
 if activity_tracker.AUTORUN_WINDOWS == 1:
     options['autostart'] = '1'
 
-
 app = Flask(__name__, static_folder=absolute_path + '/static', template_folder=absolute_path + '/templates')
 
 
 @app.route('/', methods=['GET', 'POST'])
 def dash():
-    return render_template('dash.html', autorun=int(options['autorun']), auto_win=int(options['autostart']), delete_30=int(options['delete_30']), disable_ss=int(options['disable_ss']), disable_keylog=int(options['disable_keylog']), exclude=exclude_apps, port=PORT)
+    return render_template('dash.html', autorun=int(options['autorun']), auto_win=int(options['autostart']),
+                           delete_30=int(options['delete_30']), disable_ss=int(options['disable_ss']),
+                           disable_keylog=int(options['disable_keylog']), exclude=exclude_apps, port=PORT)
 
 
 @app.route('/dash/<string:date>', methods=['GET', 'POST'])
@@ -75,7 +76,10 @@ def dash_with_date(date):
         no_data = 1
     else:
         no_data = 0
-    return render_template('dash.html', date=date, no_data=no_data, autorun=int(options['autorun']), auto_win=int(options['autostart']), delete_30=int(options['delete_30']), disable_ss=int(options['disable_ss']), disable_keylog=int(options['disable_keylog']), exclude=exclude_apps, port=PORT)
+    return render_template('dash.html', date=date, no_data=no_data, autorun=int(options['autorun']),
+                           auto_win=int(options['autostart']), delete_30=int(options['delete_30']),
+                           disable_ss=int(options['disable_ss']), disable_keylog=int(options['disable_keylog']),
+                           exclude=exclude_apps, port=PORT)
 
 
 @app.route('/windows/<string:date>', methods=['GET', 'POST'])
@@ -105,7 +109,7 @@ def usage(date):
     global refresh
     apps, timeline, timeline_colors, apps_colors = stat_engine.give_usage(db_path, date)
     eye_timeline, eye_timeline_colors = stat_engine.give_eye_tracker_data(db_path, date)
-    new_timeline = stat_engine.new_timeline(db_path, date)
+
     if apps:
         no_data = 0
     else:
@@ -113,7 +117,38 @@ def usage(date):
     tot = 0
     for each in apps:
         tot += apps[each]
-    return render_template('usage.html', app_usage=apps, date=date, timeline=timeline, timeline_colors=timeline_colors, refresh=refresh, apps_colors=apps_colors, total_time=tot, no_data=no_data, eye_timeline=eye_timeline, eye_timeline_colors=eye_timeline_colors, new_timeline=new_timeline)
+    return render_template('usage.html', app_usage=apps, date=date, timeline=timeline, timeline_colors=timeline_colors,
+                           refresh=refresh, apps_colors=apps_colors, total_time=tot, no_data=no_data,
+                           eye_timeline=eye_timeline, eye_timeline_colors=eye_timeline_colors,
+                           )
+
+
+@app.route('/usage/<string:date>/<int:slot>', methods=['GET', 'POST'])
+def hourly_data(date, slot):
+    global refresh, db_path
+    apps_hour, timeline_hour, timeline_colors_hour, apps_colors_hour = stat_engine.get_hourly_data(db_path, date, slot)
+    apps, timeline, timeline_colors, apps_colors = stat_engine.give_usage(db_path, date)
+    eye_timeline, eye_timeline_colors = stat_engine.give_eye_tracker_data(db_path, date)
+
+    if apps:
+        no_data = 0
+    else:
+        no_data = 1
+    tot = 0
+
+    if len(timeline_hour) == 0:
+        no_data_hourly = 1
+    else:
+        no_data_hourly = 0
+
+    for each in apps:
+        tot += apps[each]
+    return render_template('usage.html', app_usage=apps, date=date, timeline=timeline, timeline_colors=timeline_colors,
+                           refresh=refresh, apps_colors=apps_colors, total_time=tot, no_data=no_data,
+                           eye_timeline=eye_timeline, eye_timeline_colors=eye_timeline_colors,
+                           apps_colors_hour=apps_colors_hour,
+                           timeline_colors_hour=timeline_colors_hour, timeline_hour=timeline_hour, apps_hour=apps_hour,
+                           no_data_hourly=no_data_hourly, slot=slot)
 
 
 @app.route('/statistics/<string:date>', methods=['GET', 'POST'])
@@ -127,7 +162,9 @@ def statistics(date):
         no_data = 1
     else:
         no_data = 0
-    return render_template('statistics.html', date=date, downloads=downloads, browsers=final_browsers, first_app=first_app, second_app=second_app, third_app=third_app, total_usage=total_usage, word_count=word_count, refresh=refresh, no_data=no_data, url_data=url_data)
+    return render_template('statistics.html', date=date, downloads=downloads, browsers=final_browsers,
+                           first_app=first_app, second_app=second_app, third_app=third_app, total_usage=total_usage,
+                           word_count=word_count, refresh=refresh, no_data=no_data, url_data=url_data)
 
 
 @app.errorhandler(404)
@@ -267,7 +304,7 @@ def tracker(command):
         date = request.form['date']
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
-        if len(c.execute('SELECT * FROM tracker WHERE d = "' + date + '"').fetchall()) == 0 :
+        if len(c.execute('SELECT * FROM tracker WHERE d = "' + date + '"').fetchall()) == 0:
             return '1'
         else:
             return '0'
@@ -446,7 +483,7 @@ def tracker(command):
             try:
                 proc.username()
                 name = proc.name().lower()
-                ram = proc.memory_info().vms/1024/1024
+                ram = proc.memory_info().vms / 1024 / 1024
                 if ram > 1 and name not in ignore and name not in exclude_apps:
                     if name not in processes:
                         processes[name] = ram
@@ -470,6 +507,13 @@ def tracker(command):
         has_youtube = request.form['video']
         activity_tracker.pass_to_url_grabber(url_rec)
         activity_tracker.pass_to_video_monitor(has_youtube)
+        return 'thanks'
+
+    elif command == "get_hourly_stat":
+        slot = int(request.form['slot'])
+        date = request.form['date']
+        stat_engine.get_hourly_data(db_path, date, slot)
+        print(slot, date)
         return 'thanks'
 
     else:
@@ -499,6 +543,7 @@ def eula():
 def shutdown():
     shutdown_server()
     return 'Server shutting down...'
+
 
 # ================= FLASK APP ENDS HERE ======================
 
@@ -531,7 +576,9 @@ def load_options():
 
 
 def open_dashboard(x):
-    notify("Opening dashboard. Please wait...", "Your browser will open automatically.\n( If it does not, open your browser manually and go to\nhttp://localhost:" + s_PORT + " )", 0)
+    notify("Opening dashboard. Please wait...",
+           "Your browser will open automatically.\n( If it does not, open your browser manually and go to\nhttp://localhost:" + s_PORT + " )",
+           0)
     webbrowser.get('windows-default').open('http://localhost:' + s_PORT)
     return
 
@@ -621,11 +668,12 @@ def on_action(notification_id, action_id):
 
 # =============== MAIN PROGRAM ===================
 
-menu_options = (("Open Dashboard", absolute_path + "/static/dash.ico", open_dashboard), ("Start Tracker", None, start_tracker), ("Stop Tracker", None, stop_tracker))
+menu_options = (
+    ("Open Dashboard", absolute_path + "/static/dash.ico", open_dashboard), ("Start Tracker", None, start_tracker),
+    ("Stop Tracker", None, stop_tracker))
 tray = SysTrayIcon(absolute_path + "/static/favicon.ico", "Activity Monitor", menu_options, on_quit)
 tray.start()
 load_options()
-
 
 try:
     if options['delete_30'] == '1':
@@ -649,7 +697,8 @@ try:
 
     if options['autorun'] == '1':
         if options['eula'] == '0' or options['eula'] is None:
-            notify("Monitoring did not start automatically", "Please open the Dashboard and start manually\n(Reason - EULA not accepted)", 0)
+            notify("Monitoring did not start automatically",
+                   "Please open the Dashboard and start manually\n(Reason - EULA not accepted)", 0)
         else:
             activity_tracker.start()
             isTrackerRunning = 1
@@ -663,5 +712,3 @@ time.sleep(1)
 
 if __name__ == '__main__':
     app.run(port=PORT)
-
-

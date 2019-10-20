@@ -7,8 +7,10 @@ browsers_real = {}
 
 def give_usage(db_path, date):
     global browsers, browsers_real
-    browsers = {'Opera': [], 'Chrome': [], 'Microsoft Edge': [], 'Iexplore': [], 'Firefox': [], 'Safari': [], 'Edge (Chromium)': []}
-    browsers_real = {'Opera': [], 'Chrome': [], 'Microsoft Edge': [], 'Iexplore': [], 'Firefox': [], 'Safari': [], 'Edge (Chromium)': []}
+    browsers = {'Opera': [], 'Chrome': [], 'Microsoft Edge': [], 'Iexplore': [], 'Firefox': [], 'Safari': [],
+                'Edge (Chromium)': []}
+    browsers_real = {'Opera': [], 'Chrome': [], 'Microsoft Edge': [], 'Iexplore': [], 'Firefox': [], 'Safari': [],
+                     'Edge (Chromium)': []}
 
     colors = [
         '#1f77b4', '#2ca02c', '#d62728', '#ff7f0e', '#9467bd', '#e377c2', '#bcbd22', '#17becf', '#8c564b', '#9edae5',
@@ -60,14 +62,15 @@ def give_usage(db_path, date):
     while x < len(data):
         try:
             time_large = data[x][4].split('.')[0]  # get time of 2nd record
-            time_small = data[x-1][4].split('.')[0]  # get time of 1st record
-            diff = datetime.datetime.strptime(time_large, fmt) - datetime.datetime.strptime(time_small, fmt)  # big - small
+            time_small = data[x - 1][4].split('.')[0]  # get time of 1st record
+            diff = datetime.datetime.strptime(time_large, fmt) - datetime.datetime.strptime(time_small,
+                                                                                            fmt)  # big - small
             dt = datetime.datetime.strptime(str(diff), '%H:%M:%S')  # convert to H-M-S
             delta = datetime.timedelta(hours=dt.hour, minutes=dt.minute, seconds=dt.second)  # covert to time delta
             usage_minutes = delta.total_seconds() / 60  # convert to seconds then to minutes
         except ValueError:
             print('ValueError - Error calculating - Probably system time was changed')
-            print("PREVIOUS - " + str(data[x-1]))
+            print("PREVIOUS - " + str(data[x - 1]))
             print("THIS - " + str(data[x]))
             pass
 
@@ -301,7 +304,8 @@ def give_eye_tracker_data(db_path, date):
         try:
             time_large = data[x][2].split('.')[0]  # get time of 2nd record
             time_small = data[x - 1][2].split('.')[0]  # get time of 1st record
-            diff = datetime.datetime.strptime(time_large, fmt) - datetime.datetime.strptime(time_small, fmt)  # big - small
+            diff = datetime.datetime.strptime(time_large, fmt) - datetime.datetime.strptime(time_small,
+                                                                                            fmt)  # big - small
             dt = datetime.datetime.strptime(str(diff), '%H:%M:%S')  # convert to H-M-S
             delta = datetime.timedelta(hours=dt.hour, minutes=dt.minute, seconds=dt.second)  # covert to time delta
             usage_minutes = delta.total_seconds() / 60  # convert to seconds then to minutes
@@ -379,29 +383,89 @@ def give_eye_tracker_data(db_path, date):
     return timeline, timeline_colors
 
 
-def new_timeline(db_path, date):
+def get_hourly_data(db_path, date, slot):
+    slots = {
+        1: ("00:00:00", "01:00:00"),
+        2: ("01:00:00", "02:00:00"),
+        3: ("02:00:00", "03:00:00"),
+        4: ("03:00:00", "04:00:00"),
+        5: ("04:00:00", "05:00:00"),
+        6: ("05:00:00", "06:00:00"),
+        7: ("06:00:00", "07:00:00"),
+        8: ("07:00:00", "08:00:00"),
+        9: ("08:00:00", "09:00:00"),
+        10: ("09:00:00", "10:00:00"),
+        11: ("10:00:00", "11:00:00"),
+        12: ("11:00:00", "12:00:00"),
+        13: ("12:00:00", "13:00:00"),
+        14: ("13:00:00", "14:00:00"),
+        15: ("14:00:00", "15:00:00"),
+        16: ("15:00:00", "16:00:00"),
+        17: ("16:00:00", "17:00:00"),
+        18: ("17:00:00", "18:00:00"),
+        19: ("18:00:00", "19:00:00"),
+        20: ("19:00:00", "20:00:00"),
+        21: ("20:00:00", "21:00:00"),
+        22: ("21:00:00", "22:00:00"),
+        23: ("22:00:00", "23:00:00"),
+        24: ("23:00:00", "24:00:00")
+    }
+
+    try:
+        low_time = slots[slot][0]
+        high_time = slots[slot][1]
+    except KeyError:
+        return
+
+    global browsers, browsers_real
+    browsers = {'Opera': [], 'Chrome': [], 'Microsoft Edge': [], 'Iexplore': [], 'Firefox': [], 'Safari': [],
+                'Edge (Chromium)': []}
+    browsers_real = {'Opera': [], 'Chrome': [], 'Microsoft Edge': [], 'Iexplore': [], 'Firefox': [], 'Safari': [],
+                     'Edge (Chromium)': []}
+
+    colors = [
+        '#1f77b4', '#2ca02c', '#d62728', '#ff7f0e', '#9467bd', '#e377c2', '#bcbd22', '#17becf', '#8c564b', '#9edae5',
+        '#aec7e8', '#ffbb78', '#98df8a', '#ff9896', '#c5b0d5', '#c49c94', '#f7b6d2', '#c7c7c7', '#dbdb8d', '#7f7f7f'
+    ]
+
     fmt = '%H:%M:%S'
+    idle_time = datetime.timedelta(seconds=185)
     today = datetime.date.today().strftime("%Y-%m-%d")
-    idle_time = datetime.timedelta(seconds=188)
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
-    c.execute('SELECT * FROM tracker WHERE d="' + date + '" AND app="Chrome" ORDER BY t')
+    c.execute(
+        'SELECT * FROM tracker WHERE t < time("' + high_time + '") AND t > time("' + low_time + '") AND d = "' + date + '" ')
     data = c.fetchall()
 
+    c.execute('SELECT DISTINCT app FROM tracker WHERE d="' + date + '"')
+    applications = c.fetchall()
+    # create dictionary
+    apps = {}
+    apps_colors = {}
     timeline = []
+    timeline_colors = []
+
+    for row in applications:
+        app_name = row[0].split(' - ')[0]
+        apps[app_name] = 0
+        apps_colors['Inactive'] = '#eeeeee'
+        apps_colors['No Data'] = '#ffffff'
+        if app_name not in apps_colors:
+            apps_colors[app_name] = colors[0]
+            colors.append(colors.pop(0))
 
     try:
         time_large = data[0][4].split('.')[0]  # get time of 1st record
-        time_small = "00:00:00"  # midnight
+        time_small = low_time  # midnight
         diff = datetime.datetime.strptime(time_large, fmt) - datetime.datetime.strptime(time_small, fmt)  # big - small
         dt = datetime.datetime.strptime(str(diff), '%H:%M:%S')  # convert to H-M-S
         delta = datetime.timedelta(hours=dt.hour, minutes=dt.minute, seconds=dt.second)  # covert to time delta
         midnight_minutes = delta.total_seconds() / 60  # convert to seconds then to minutes
 
         if midnight_minutes > 3.1:
-            timeline.append([1, 'Inactive', date + ' 00:00:00', date + ' ' + time_large])
+            timeline.append(["Inactive", midnight_minutes])
         else:
-            timeline.append([1, data[0][1], date + ' 00:00:00', date + ' ' + time_large])
+            timeline.append([data[0][1], midnight_minutes])
 
     except (ValueError, IndexError):
         pass
@@ -411,7 +475,8 @@ def new_timeline(db_path, date):
         try:
             time_large = data[x][4].split('.')[0]  # get time of 2nd record
             time_small = data[x - 1][4].split('.')[0]  # get time of 1st record
-            diff = datetime.datetime.strptime(time_large, fmt) - datetime.datetime.strptime(time_small, fmt)  # big - small
+            diff = datetime.datetime.strptime(time_large, fmt) - datetime.datetime.strptime(time_small,
+                                                                                            fmt)  # big - small
             dt = datetime.datetime.strptime(str(diff), '%H:%M:%S')  # convert to H-M-S
             delta = datetime.timedelta(hours=dt.hour, minutes=dt.minute, seconds=dt.second)  # covert to time delta
             usage_minutes = delta.total_seconds() / 60  # convert to seconds then to minutes
@@ -423,29 +488,60 @@ def new_timeline(db_path, date):
 
         if diff > idle_time:
             try:
-                if timeline[-1][1] == "Inactive":
-                    timeline[-1][3] = date + ' ' + time_large
+                if timeline[-1][0] == "Inactive":
+                    timeline[-1][1] += usage_minutes
                 else:
-                    timeline.append([x + 1, 'Inactive', date + ' ' + time_small, date + ' ' + time_large])
+                    timeline.append(["Inactive", usage_minutes])
             except IndexError:
-                timeline.append([x + 1, 'Inactive', date + ' ' + time_small, date + ' ' + time_large])
+                timeline.append(["Inactive", usage_minutes])
 
         else:
             try:
-                if timeline[-1][1] == data[x - 1][1]:
-                    timeline[-1][3] = date + ' ' + time_large
+                apps[data[x - 1][1]] += usage_minutes
+                # apps[data[x - 1][1].split(' - ')[0]] += usage_minutes  ======= this was here
+                # if timeline[-1][0] == data[x - 1][1].split(' - ')[0]: ========== this also
+                if timeline[-1][0] == data[x - 1][1]:
+                    timeline[-1][1] += usage_minutes
+                    try:
+                        if data[x - 1][1] in browsers:
+                            mid = data[x - 1][6].split('-')
+                            if len(mid) > 1:
+                                window = '-'.join(mid[:-1])
+                            else:
+                                window = mid[0]
+
+                            if window not in browsers[data[x - 1][1]]:
+                                browsers[data[x - 1][1]].append(window)
+                                browsers_real[data[x - 1][1]].append(data[x - 1][4] + '  |  ' + window)
+
+                    except Exception as e:
+                        print(e)
                 else:
-                    timeline.append([x + 1, data[x - 1][1], date + ' ' + time_small, date + ' ' + time_large])
+                    # timeline.append([data[x - 1][1].split(' - ')[0], usage_minutes])  ========== this tooo
+                    timeline.append([data[x - 1][1], usage_minutes])
+                    try:
+                        if data[x - 1][1] in browsers:
+                            mid = data[x - 1][6].split('-')
+                            if len(mid) > 1:
+                                window = '-'.join(mid[:-1])
+                            else:
+                                window = mid[0]
+                            if window not in browsers[data[x - 1][1]]:
+                                browsers[data[x - 1][1]].append(window)
+                                browsers_real[data[x - 1][1]].append(data[x - 1][4] + '  |  ' + window)
+                    except Exception as e:
+                        print(e)
             except ValueError:
                 print('ValueError - Error calculating - Probably system time was changed')
                 pass
             except IndexError:
-                timeline.append([x + 1, data[x][1], date + ' ' + time_small, date + ' ' + time_large])
+                # timeline.append([data[x - 1][1].split(' - ')[0], usage_minutes]) =========== this as well
+                timeline.append([data[x - 1][1], usage_minutes])
 
         x += 1
 
     try:
-        time_large = "23:59:59"  # get time of 2nd record
+        time_large = high_time  # get time of 2nd record
         time_small = data[-1][4].split('.')[0]  # get time of last record
         diff = datetime.datetime.strptime(time_large, fmt) - datetime.datetime.strptime(time_small, fmt)  # big - small
         dt = datetime.datetime.strptime(str(diff), '%H:%M:%S')  # convert to H-M-S
@@ -454,16 +550,15 @@ def new_timeline(db_path, date):
 
         if no_data_time > 3:
             if today == data[-1][3]:
-                timeline.append([x + 1, 'No Data', date + ' ' + time_small, date + ' ' + time_large])
+                timeline.append(["No Data", no_data_time])
             else:
-                timeline.append([x + 1, 'Inactive', date + ' ' + time_small, date + ' ' + time_large])
+                timeline.append(["Inactive", no_data_time])
 
     except (ValueError, IndexError):
         print('ValueError - Error calculating - Probably system time was changed')
         pass
 
-    for q in timeline:
-        print(q)
+    for record in timeline:
+        timeline_colors.append(apps_colors[record[0]])
 
-    return timeline
-
+    return apps, timeline, timeline_colors, apps_colors
