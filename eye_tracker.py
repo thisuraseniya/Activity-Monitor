@@ -30,31 +30,32 @@ def main(db_path):
         faces = faceCascade.detectMultiScale(frame)
 
         if faces != ():
-            print("Face Detected")
             face_detected = 1
             FACE = 1
         else:
-            # print("No face")
             FACE = 0
             pass
 
         for (x, y, w, h) in faces:
             cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
             crop_img = frame[y:y + h, x:x + w]
+
             eyes = eyeCascade.detectMultiScale(crop_img, 1.3, 5)
 
             if eyes != ():
                 eyes_detected = 1
                 push_data(db_path, no_video, face_detected, eyes_detected)
                 cv2.destroyAllWindows()
+                print("Face Detected ", face_detected)
+                print("Eyes Detected ", eyes_detected)
                 return
             else:
-                print("No eyes")
                 pass
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
             break
+
 
     cv2.destroyAllWindows()
     push_data(db_path, no_video, face_detected, eyes_detected)
