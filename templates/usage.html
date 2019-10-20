@@ -22,6 +22,19 @@
     <link href="{{ url_for('static', filename='toggle.css' ) }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='offline.css' ) }}" rel="stylesheet">
     <link href="{{ url_for('static', filename='vis.css' ) }}" rel="stylesheet" type="text/css"/>
+    <style>
+        .slot {
+            width: 97%;
+            padding-left: 0;
+        }
+
+        @media only screen and (max-width: 1367px) {
+          .slot {
+                width: 95.5%;
+              padding-left: 16px;
+          }
+        }
+</style>
 </head>
 
 <body id="page-top">
@@ -161,7 +174,7 @@
                                     <div class="col-12" id="timeline-chart"></div>
                                 </div>
                                 <div class="row" style="margin-top: -25px">
-                                    <div style="width: 95.5%; padding-left: 16px">
+                                    <div class="slot">
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="row" style="padding-left: 3%; padding-right: 0">
