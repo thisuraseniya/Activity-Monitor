@@ -29,12 +29,12 @@
         }
 
         @media only screen and (max-width: 1367px) {
-          .slot {
+            .slot {
                 width: 95.5%;
-              padding-left: 16px;
-          }
+                padding-left: 16px;
+            }
         }
-</style>
+    </style>
 </head>
 
 <body id="page-top">
@@ -168,7 +168,7 @@
                                     to be displayed
                                 </center>
                             </div>
-                        {%  else %}
+                        {% else %}
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-12" id="timeline-chart"></div>
@@ -178,34 +178,106 @@
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="row" style="padding-left: 3%; padding-right: 0">
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(1)">12am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(2)">1am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(3)">2am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(4)">3am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(5)">4am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(6)">5am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(7)">6am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(8)">7am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(9)">8am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(10)">9am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(11)">10am</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(12)">11am</label></div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(1)">12am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(2)">1am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(3)">2am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(4)">3am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(5)">4am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(6)">5am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(7)">6am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(8)">7am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(9)">8am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(10)">9am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(11)">10am</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(12)">11am</label>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="row" style="padding-left: 0; padding-right: 3%">
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(13)">12pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(14)">1pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(15)">2pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(16)">3pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(17)">4pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(18)">5pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(19)">6pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(20)">7pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(21)">8pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(22)">9pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(23)">10pm</label></div>
-                                                    <div class="col-1" style="padding: 0; text-align: center; font-size: 0.8rem"><label style="cursor: pointer" onclick="slot(24)">11pm</label></div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(13)">12pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(14)">1pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(15)">2pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(16)">3pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(17)">4pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(18)">5pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(19)">6pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(20)">7pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(21)">8pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(22)">9pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(23)">10pm</label>
+                                                    </div>
+                                                    <div class="col-1"
+                                                         style="padding: 0; text-align: center; font-size: 0.8rem">
+                                                        <label style="cursor: pointer" onclick="slot(24)">11pm</label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -257,6 +329,7 @@
                                     <button type="button" class="btn btn-success" id="slot_btn">Select</button>
                                 </div>
                             </div>
+
                             <div class="row">
                                 <div class="card-body" id="timeline-chart-hourly">
                                     {% if no_data_hourly == 1 %}
@@ -269,6 +342,42 @@
                                     {% endif %}
                                 </div>
                             </div>
+
+                            {% if no_data_hourly == 0 %}
+                                <div class="row">
+                                    <div class="col col-12">
+                                        <div id="accordion">
+                                            <div class="card">
+
+                                                {% for key, value in apps_hour_words.items() %}
+
+
+                                                    <div class="card-header" id="{{ value[0] }}-heading">
+                                                        <h5 class="mb-0">
+                                                            <button class="btn btn-link" data-toggle="collapse"
+                                                                    data-target="#{{ value[0] }}-collapse"
+                                                                    aria-expanded="false"
+                                                                    aria-controls="{{ value[0] }}-collapse">
+                                                                {{ key }}
+                                                            </button>
+                                                        </h5>
+                                                    </div>
+                                                    <div id="{{ value[0] }}-collapse" class="collapse"
+                                                         aria-labelledby="{{ value[0] }}-heading"
+                                                         data-parent="#accordion">
+                                                        <div class="card-body">
+                                                            <pre style="white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ value[1] }}</pre>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            {% endif %}
 
                         </div>
 

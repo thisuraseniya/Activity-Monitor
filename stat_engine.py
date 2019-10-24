@@ -562,3 +562,58 @@ def get_hourly_data(db_path, date, slot):
         timeline_colors.append(apps_colors[record[0]])
 
     return apps, timeline, timeline_colors, apps_colors
+
+
+def get_hourly_keystrokes(db_path, date, slot):
+    app_words = {}
+    slots = {
+        1: ("00:00:00", "01:00:00"),
+        2: ("01:00:00", "02:00:00"),
+        3: ("02:00:00", "03:00:00"),
+        4: ("03:00:00", "04:00:00"),
+        5: ("04:00:00", "05:00:00"),
+        6: ("05:00:00", "06:00:00"),
+        7: ("06:00:00", "07:00:00"),
+        8: ("07:00:00", "08:00:00"),
+        9: ("08:00:00", "09:00:00"),
+        10: ("09:00:00", "10:00:00"),
+        11: ("10:00:00", "11:00:00"),
+        12: ("11:00:00", "12:00:00"),
+        13: ("12:00:00", "13:00:00"),
+        14: ("13:00:00", "14:00:00"),
+        15: ("14:00:00", "15:00:00"),
+        16: ("15:00:00", "16:00:00"),
+        17: ("16:00:00", "17:00:00"),
+        18: ("17:00:00", "18:00:00"),
+        19: ("18:00:00", "19:00:00"),
+        20: ("19:00:00", "20:00:00"),
+        21: ("20:00:00", "21:00:00"),
+        22: ("21:00:00", "22:00:00"),
+        23: ("22:00:00", "23:00:00"),
+        24: ("23:00:00", "24:00:00")
+    }
+
+    try:
+        low_time = slots[slot][0]
+        high_time = slots[slot][1]
+    except KeyError:
+        return
+
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute(
+        'SELECT * FROM key_logger_new WHERE t < time("' + high_time + '") AND t > time("' + low_time + '") AND d = "' + date + '" ')
+    data = c.fetchall()
+
+    for row in data:
+        app = str(row[2])
+        word_count = int(row[6])
+        content = row[5]
+        id = "_".join(app.split(" "))
+        if app in app_words:
+            app_words[app] = (id, app_words[app][1] + "\n" + content, int(app_words[app][2]) + word_count)
+        else:
+            app_words[app] = (id, content, word_count)
+
+    print(app_words)
+    return app_words

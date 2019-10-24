@@ -129,6 +129,7 @@ def hourly_data(date, slot):
     apps_hour, timeline_hour, timeline_colors_hour, apps_colors_hour = stat_engine.get_hourly_data(db_path, date, slot)
     apps, timeline, timeline_colors, apps_colors = stat_engine.give_usage(db_path, date)
     eye_timeline, eye_timeline_colors = stat_engine.give_eye_tracker_data(db_path, date)
+    apps_hour_words = stat_engine.get_hourly_keystrokes(db_path, date, slot)
 
     if apps:
         no_data = 0
@@ -148,7 +149,7 @@ def hourly_data(date, slot):
                            eye_timeline=eye_timeline, eye_timeline_colors=eye_timeline_colors,
                            apps_colors_hour=apps_colors_hour,
                            timeline_colors_hour=timeline_colors_hour, timeline_hour=timeline_hour, apps_hour=apps_hour,
-                           no_data_hourly=no_data_hourly, slot=slot)
+                           no_data_hourly=no_data_hourly, slot=slot, apps_hour_words=apps_hour_words)
 
 
 @app.route('/statistics/<string:date>', methods=['GET', 'POST'])

