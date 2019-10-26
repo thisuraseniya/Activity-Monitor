@@ -298,7 +298,7 @@
                             <div class="row">
                                 <div class="col-4">
                                     <select class="custom-select" id="slot_select">
-                                        <option selected disabled>Choose...</option>
+                                        <option selected disabled value="0">Choose...</option>
                                         <option value="1">12:01 AM - 1:00 AM</option>
                                         <option value="2">1:00 AM - 2:00 AM</option>
                                         <option value="3">2:00 AM - 3:00 AM</option>
@@ -325,7 +325,7 @@
                                         <option value="24">11:00 PM - 11:59 PM</option>
                                     </select>
                                 </div>
-                                <div class="col-8">
+                                <div class="col col-8">
                                     <button type="button" class="btn btn-success" id="slot_btn">Select</button>
                                 </div>
                             </div>
@@ -345,34 +345,47 @@
 
                             {% if no_data_hourly == 0 %}
                                 <div class="row">
-                                    <div class="col col-12">
-                                        <div id="accordion">
-                                            <div class="card">
-
-                                                {% for key, value in apps_hour_words.items() %}
-
-
-                                                    <div class="card-header" id="{{ value[0] }}-heading">
-                                                        <h5 class="mb-0">
-                                                            <button class="btn btn-link" data-toggle="collapse"
-                                                                    data-target="#{{ value[0] }}-collapse"
-                                                                    aria-expanded="false"
-                                                                    aria-controls="{{ value[0] }}-collapse">
-                                                                {{ key }}
-                                                            </button>
-                                                        </h5>
-                                                    </div>
-                                                    <div id="{{ value[0] }}-collapse" class="collapse"
-                                                         aria-labelledby="{{ value[0] }}-heading"
-                                                         data-parent="#accordion">
-                                                        <div class="card-body">
-                                                            <pre style="white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ value[1] }}</pre>
-                                                        </div>
-                                                    </div>
-                                                {% endfor %}
-
+                                    <div class="col-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <i class="fas fa-fw fa-keyboard"></i> Websites visited
+                                            </div>
+                                            <div class="card-body" id="url-hour-bar-chart">
                                             </div>
                                         </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <i class="fas fa-fw fa-keyboard"></i> Keystrokes
+                                            </div>
+                                            <div class="card-body">
+                                                <div id="accordion">
+                                                    <div class="card">
+                                                        {% for key, value in apps_hour_words.items() %}
+                                                            <div class="card-header" id="{{ value[0] }}-heading">
+                                                        <span class="btn-link" style="cursor: pointer"
+                                                              data-toggle="collapse"
+                                                              data-target="#{{ value[0] }}-collapse"
+                                                              aria-expanded="false"
+                                                              aria-controls="{{ value[0] }}-collapse">
+                                                            {{ key }}
+                                                        </span>
+                                                            </div>
+                                                            <div id="{{ value[0] }}-collapse" class="collapse"
+                                                                 aria-labelledby="{{ value[0] }}-heading"
+                                                                 data-parent="#accordion">
+                                                                <div class="card-body">
+                                                                    <pre style="white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word; font-size: 0.8rem">{{ value[1] }}</pre>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
 
 
@@ -1239,7 +1252,12 @@
 <script>
     $("#slot_btn").click(function () {
         let slot = $("#slot_select").val();
-        window.location.replace(window.location.origin + "/usage/{{ date }}/" + slot)
+        if (slot === "0") {
+            alert("Please choose a time slot");
+        }
+        else {
+            window.location.replace(window.location.origin + "/usage/{{ date }}/" + slot)
+        }
     })
 
     {% if date and slot %}
@@ -1252,6 +1270,102 @@
     function slot(s) {
         window.location.href = window.location.origin + "/usage/{{ date }}/" + s;
     }
+</script>
+
+<script>
+    {% if url_hour %}
+        var options = {
+            chart: {
+                height: 400,
+                type: 'bar',
+                events: {
+                    click: function (chart, w, e) {
+                        console.log(chart, w, e)
+                    }
+                },
+            },
+            colors: ["#1F77B4"],
+            tooltip: {
+                x: {
+                    show: true,
+                    formatter: "dd",
+                },
+                y: {
+                    formatter: function (val) {
+                        return convert_minutes(val / 60);
+                    }
+                },
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    columnWidth: '75%',
+                    distributed: true,
+
+                    dataLabels: {
+                        position: 'top', // top, center, bottom
+                    },
+                }
+            },
+            dataLabels: {
+                enabled: false,
+                formatter: function (val) {
+                    return Math.round(val * 100) / 100;
+                },
+                offsetY: -15,
+                style: {
+                    fontSize: '10px',
+                    colors: ["#000000"]
+                }
+            },
+
+            series: [{
+                name: [
+                    'Duration'
+                ],
+                data: [
+                    {% for key, value in url_hour.items() %}
+                        {{ value }},
+                    {% endfor %}
+                ]
+            }],
+            xaxis: {
+                categories: [
+                    {% for key, value in url_hour.items() %}
+                        "{{ key }}",
+                    {% endfor %}
+                ],
+                labels: {
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: '"Segoe UI", Roboto, "Helvetica Neue"',
+                    },
+                    rotate: -45,
+                    trim: false,
+                }
+            },
+            yaxis: {
+                tickAmount: 4,
+                decimalsInFloat: 1,
+                title: {
+                    text: 'Duration (Minutes)',
+                    style: {
+                        fontSize: '12px',
+                        fontFamily: '"Segoe UI", Roboto, "Helvetica Neue"',
+                    }
+                },
+                labels: {
+                    offsetY: 0,
+                }
+            },
+        };
+
+        var bar = new ApexCharts(
+            document.querySelector("#url-hour-bar-chart"),
+            options
+        );
+        bar.render();
+    {% endif %}
 </script>
 
 

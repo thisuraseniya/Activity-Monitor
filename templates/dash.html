@@ -1,1012 +1,1063 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <head>
+<head>
 
 
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <title>Activity Monitor</title>
-        <link rel="icon" type="image/ico" href="{{ url_for('static', filename='favicon.ico' ) }}">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Activity Monitor</title>
+    <link rel="icon" type="image/ico" href="{{ url_for('static', filename='favicon.ico' ) }}">
 
-        <!-- Datepicker css-->
-        <link href="{{ url_for('static', filename='datepicker.css' ) }}" rel="stylesheet">
+    <!-- Datepicker css-->
+    <link href="{{ url_for('static', filename='datepicker.css' ) }}" rel="stylesheet">
 
-        <!-- Custom fonts for this template-->
-        <link href="{{ url_for('static', filename='all.min.css' ) }}" rel="stylesheet" type="text/css">
+    <!-- Custom fonts for this template-->
+    <link href="{{ url_for('static', filename='all.min.css' ) }}" rel="stylesheet" type="text/css">
 
-        <!-- Custom styles for this template-->
-        <link href="{{ url_for('static', filename='offline.css' ) }}" rel="stylesheet">
-        <link href="{{ url_for('static', filename='sb-admin.css' ) }}" rel="stylesheet">
-        <link href="{{ url_for('static', filename='native-toast.css' ) }}" rel="stylesheet">
-        <link href="{{ url_for('static', filename='awesome-bootstrap-checkbox.css' ) }}" rel="stylesheet">
-    </head>
+    <!-- Custom styles for this template-->
+    <link href="{{ url_for('static', filename='offline.css' ) }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='sb-admin.css' ) }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='native-toast.css' ) }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='awesome-bootstrap-checkbox.css' ) }}" rel="stylesheet">
+</head>
 
-    <body id="page-top">
-        <div class="overlay" id="overlay_unsupport">
-            <div class="overlay-text">
-                <h4 class="text-danger"><b>This browser is not supported</b></h4>
-                <p class="text-danger"> This application does not support older browsers such as Internet Explorer.<br>Use a newer browser like Microsoft Edge, Google Chrome, Mozilla Firefox, Opera or Safari</p>
-                <span class="text-white">You can copy and navigate to the following URL using a supported browser.</span>
-                <center>
-                    <div class="input-group mt-3 col-lg-5">
-                        <input type="text" class="form-control text-center" value="http://localhost:{{ port }}" readonly>
-                    </div>
-                </center>
+<body id="page-top">
+<div class="overlay" id="overlay_unsupport">
+    <div class="overlay-text">
+        <h4 class="text-danger"><b>This browser is not supported</b></h4>
+        <p class="text-danger"> This application does not support older browsers such as Internet Explorer.<br>Use a
+            newer browser like Microsoft Edge, Google Chrome, Mozilla Firefox, Opera or Safari</p>
+        <span class="text-white">You can copy and navigate to the following URL using a supported browser.</span>
+        <center>
+            <div class="input-group mt-3 col-lg-5">
+                <input type="text" class="form-control text-center" value="http://localhost:{{ port }}" readonly>
             </div>
+        </center>
+    </div>
+</div>
+
+<script>
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf("MSIE ");
+    if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+        document.getElementById('overlay_unsupport').style.display = 'block';
+
+    }
+</script>
+
+<nav class="navbar navbar-expand navbar-dark bg-dark fixed-top justify-content-between">
+
+    <a class="navbar-brand mr-1" href="../"><img src="{{ url_for('static', filename='favicon.ico' ) }}" height="30px">
+        Activity Monitor
+        <span id="running_spinner" data-toggle="tooltip" data-placement="right" title="Running"
+              class="spinner-grow spinner-grow-sm text-success" role="status" aria-hidden="true"
+              style="margin-bottom: 3px; display: none;"></span>
+    </a>
+
+    <!-- Navbar -->
+    <div class="h4 text-white">{% if date %}Date - {{ date }}{% endif %}</div>
+    <div></div>
+</nav>
+
+<div id="wrapper">
+    <div class="overlay" id="overlay">
+        <div class="overlay-text">
+            <div class="spinner-grow text-danger" style="width: 3rem; height: 3rem;" role="status">
             </div>
+            <br>
+            <p class="text-danger h5">Reconnecting with Activity Monitor ...</p>
+        </div>
+    </div>
 
-        <script>
-            var ua = window.navigator.userAgent;
-            var msie = ua.indexOf("MSIE ");
-            if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./))
-            {
-                document.getElementById('overlay_unsupport').style.display = 'block';
-
-            }
-        </script>
-
-        <nav class="navbar navbar-expand navbar-dark bg-dark fixed-top justify-content-between">
-
-            <a class="navbar-brand mr-1" href="../"><img src="{{ url_for('static', filename='favicon.ico' ) }}" height="30px" >
-                Activity Monitor
-                <span id="running_spinner" data-toggle="tooltip" data-placement="right" title="Running" class="spinner-grow spinner-grow-sm text-success" role="status" aria-hidden="true" style="margin-bottom: 3px; display: none;"></span>
+    <!-- Sidebar -->
+    <ul class="sidebar navbar-nav">
+        <li class="nav-item active">
+            <a class="nav-link" href="{% if date %}{{ '../dash/' + date }}{% endif %}">
+                <i class="fas fa-fw fa-tachometer-alt"></i>
+                <span>Dashboard</span>
             </a>
+        </li>
+        {% if date and no_data == 0 %}
+            <div id="navs">
+                <li class="nav-item">
+                    <a class="nav-link" href="../usage/{{ date }}" style="color:#007bff">
+                        <i class="fas fa-fw fa-chart-area"></i>
+                        <span>App Usage</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../statistics/{{ date }}" style="color:#ff7f0e">
+                        <i class="fas fa-fw fa-chart-bar"></i>
+                        <span>Statistics</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../windows/{{ date }}" style="color:#dc3545">
+                        <i class="fas fa-fw fa-window-restore"></i>
+                        <span>Windows</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../screenshots/{{ date }}" style="color:#28a745">
+                        <i class="fas fa-fw fa-desktop"></i>
+                        <span>Screenshots</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../keystrokes/{{ date }}" style="color:#ffc107">
+                        <i class="fas fa-fw fa-keyboard"></i>
+                        <span>Keystrokes</span></a>
+                </li>
+            </div>
+        {% endif %}
+    </ul>
 
-            <!-- Navbar -->
-            <div class="h4 text-white">{%  if date %}Date - {{ date }}{% endif %}</div>
-            <div></div>
-        </nav>
+    <div id="content-wrapper">
+        <div class="container-fluid">
 
-        <div id="wrapper">
-            <div class="overlay" id="overlay">
-                <div class="overlay-text">
-                    <div class="spinner-grow text-danger" style="width: 3rem; height: 3rem;" role="status">
+            <!-- Breadcrumbs-->
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="../">Activity Monitor</a>
+                </li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card-deck">
+
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <i class="fas fa-sliders-h"></i>
+                                Activity Monitor options
+                            </div>
+                            <div class="card-body">
+                                <button id="start_tracker" class="btn btn-success btn-block" type="button"
+                                        onclick="start_tracker()" style="display: none" disabled>
+                                    <span class="btn-text-span">Start Monitoring</span>
+                                    <span class="spinner-grow spinner-grow-sm start-spin" role="status"
+                                          aria-hidden="true" style="display: none"></span>
+                                    <span id="start-spinner" class="start-spin" style="display: none">Starting...</span>
+                                    <span class="please-wait-text" style="display: none">Please wait...</span>
+                                </button>
+                                <button id="stop_tracker" class="btn btn-danger btn-block" onclick="stop_tracker()"
+                                        style="display: none; margin-top: 0" disabled>
+                                    <span class="btn-text-span">Stop Monitoring</span>
+                                    <span class="spinner-grow spinner-grow-sm stop-spin" role="status"
+                                          aria-hidden="true" style="display: none"></span>
+                                    <span class="stop-spin" style="display: none">Stopping...</span>
+                                </button>
+                                <button id="init_tracker" class="btn btn-dark btn-block" style="margin-top: 0" disabled>
+                                    <span class="spinner-grow spinner-grow-sm stop-spin" role="status"
+                                          aria-hidden="true"></span>
+                                    <span class="stop-spin">Initializing...</span>
+                                </button>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="abc-checkbox abc-checkbox-primary col-lg-12">
+                                            <input class="form-check-input" id="disable_ss" type="checkbox"
+                                                   {% if disable_ss %}checked{% endif %}>
+                                            <label class="form-check-label" for="disable_ss">
+                                                Disable Screenshots
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-12">
+                                        <div class="abc-checkbox abc-checkbox-primary col-lg-12">
+                                            <input class="form-check-input" id="disable_keylog" type="checkbox"
+                                                   {% if disable_keylog %}checked{% endif %}>
+                                            <label class="form-check-label" for="disable_keylog">
+                                                Disable Key-Logging
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="abc-checkbox abc-checkbox-primary col-lg-12">
+                                            <input class="form-check-input" id="windows_start_check" type="checkbox"
+                                                   {% if auto_win %}checked{% endif %}>
+                                            <label class="form-check-label" for="windows_start_check">
+                                                Run Activity Monitor when I log into Windows
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-12">
+                                        <div class="abc-checkbox abc-checkbox-primary col-lg-12">
+                                            <input class="form-check-input" id="start_check" type="checkbox"
+                                                   {% if autorun %}checked{% endif %}>
+                                            <label class="form-check-label" for="start_check">
+                                                Automatically start monitoring as soon as Activity Monitor runs
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-12">
+                                        <div class="abc-checkbox abc-checkbox-primary col-lg-12">
+                                            <input class="form-check-input" id="delete_30" type="checkbox"
+                                                   {% if delete_30 %}checked{% endif %}>
+                                            <label class="form-check-label" for="delete_30">
+                                                Automatically delete data older than 30 days
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="row">
+                                    <div class="col-lg-12">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <i class="fas fa-calendar"></i>
+                                View Data
+                            </div>
+                            <div class="card-body">
+                                <form method="post" id="date_form">
+                                    <center>
+                                        <input type='text' id="datepick" style="display: none" name="date" required/>
+                                        <button type="submit" class="btn btn-danger btn-block" disabled
+                                                style="margin-top: 20px;" id="view" name="view">Select a date
+                                        </button>
+                                        <div class="alert alert-danger text-center" role="alert"
+                                             style="margin-top: 20px; display: none" id="select_alert">
+                                            Select a date
+                                        </div>
+                                    </center>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <br>
-                    <p class="text-danger h5">Reconnecting with Activity Monitor ...</p>
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <ul class="sidebar navbar-nav" >
-                <li class="nav-item active">
-                    <a class="nav-link" href="{% if date %}{{ '../dash/' + date }}{% endif %}">
-                        <i class="fas fa-fw fa-tachometer-alt"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </li> 
-                {% if date and no_data == 0 %}
-                <div id="navs">
-                    <li class="nav-item">
-                        <a class="nav-link" href="../usage/{{date}}" style="color:#007bff">
-                            <i class="fas fa-fw fa-chart-area"></i>
-                            <span>App Usage</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../statistics/{{date}}" style="color:#ff7f0e">
-                            <i class="fas fa-fw fa-chart-bar"></i>
-                            <span>Statistics</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../windows/{{date}}" style="color:#dc3545">
-                            <i class="fas fa-fw fa-window-restore"></i>
-                            <span>Windows</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../screenshots/{{date}}" style="color:#28a745">
-                            <i class="fas fa-fw fa-desktop"></i>
-                            <span>Screenshots</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="../keystrokes/{{date}}" style="color:#ffc107">
-                            <i class="fas fa-fw fa-keyboard"></i>
-                            <span>Keystrokes</span></a>
-                    </li>
-                </div>
-                {% endif %}
-            </ul>
-
-            <div id="content-wrapper">
-                <div class="container-fluid">
-
-                    <!-- Breadcrumbs-->
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="../">Activity Monitor</a>
-                        </li>
-                        <li class="breadcrumb-item active">Dashboard</li>
-                    </ol>
-
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="card-deck">
-
-
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <i class="fas fa-sliders-h"></i>
-                                        Activity Monitor options
-                                    </div>
-                                    <div class="card-body">
-                                        <button id="start_tracker" class="btn btn-success btn-block" type="button" onclick="start_tracker()" style="display: none" disabled>
-                                            <span class="btn-text-span">Start Monitoring</span>
-                                            <span class="spinner-grow spinner-grow-sm start-spin" role="status" aria-hidden="true" style="display: none"></span>
-                                            <span id="start-spinner" class="start-spin" style="display: none">Starting...</span>
-                                            <span class="please-wait-text" style="display: none">Please wait...</span>
-                                        </button>
-                                        <button id="stop_tracker" class="btn btn-danger btn-block" onclick="stop_tracker()" style="display: none; margin-top: 0" disabled>
-                                            <span class="btn-text-span">Stop Monitoring</span>
-                                            <span class="spinner-grow spinner-grow-sm stop-spin" role="status" aria-hidden="true" style="display: none"></span>
-                                            <span class="stop-spin" style="display: none">Stopping...</span>
-                                        </button>
-                                        <button id="init_tracker" class="btn btn-dark btn-block" style="margin-top: 0" disabled>
-                                            <span class="spinner-grow spinner-grow-sm stop-spin" role="status" aria-hidden="true"></span>
-                                            <span class="stop-spin">Initializing...</span>
-                                        </button>
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="abc-checkbox abc-checkbox-primary col-lg-12">
-                                                    <input class="form-check-input" id="disable_ss" type="checkbox" {% if disable_ss %}checked{% endif %}>
-                                                    <label class="form-check-label" for="disable_ss">
-                                                        Disable Screenshots
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-3">
-                                            <div class="col-lg-12">
-                                                <div class="abc-checkbox abc-checkbox-primary col-lg-12">
-                                                    <input class="form-check-input" id="disable_keylog" type="checkbox" {% if disable_keylog %}checked{% endif %}>
-                                                    <label class="form-check-label" for="disable_keylog">
-                                                        Disable Key-Logging
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-lg-12">
-                                                <div class="abc-checkbox abc-checkbox-primary col-lg-12">
-                                                    <input class="form-check-input" id="windows_start_check" type="checkbox" {% if auto_win %}checked{% endif %}>
-                                                    <label class="form-check-label" for="windows_start_check">
-                                                        Run Activity Monitor when I log into Windows
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-3">
-                                            <div class="col-lg-12">
-                                                <div class="abc-checkbox abc-checkbox-primary col-lg-12">
-                                                    <input class="form-check-input" id="start_check" type="checkbox" {% if autorun %}checked{% endif %}>
-                                                    <label class="form-check-label" for="start_check">
-                                                        Automatically start monitoring as soon as Activity Monitor runs
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mt-3">
-                                            <div class="col-lg-12">
-                                                <div class="abc-checkbox abc-checkbox-primary col-lg-12">
-                                                    <input class="form-check-input" id="delete_30" type="checkbox" {% if delete_30 %}checked{% endif %}>
-                                                    <label class="form-check-label" for="delete_30">
-                                                        Automatically delete data older than 30 days
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <hr>
-                                        <div class="row">
-                                            <div class="col-lg-12">
-
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="card mb-3">
-                                    <div class="card-header">
-                                        <i class="fas fa-calendar"></i>
-                                        View Data</div>
-                                    <div class="card-body">
-                                        <form method="post" id="date_form">
-                                            <center>
-                                                <input type='text' id="datepick" style="display: none" name="date" required />
-                                                <button type="submit" class="btn btn-danger btn-block" disabled style="margin-top: 20px;" id="view" name="view">Select a date</button>
-                                                <div class="alert alert-danger text-center" role="alert" style="margin-top: 20px; display: none" id="select_alert">
-                                                Select a date
-                                                </div>
-                                            </center>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="row mb-3">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-ban text-danger"></i> Exclude programs from being monitored
                         </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-lg-6">
-                            <div class="card">
-                                <div class="card-header">
-                                    <i class="fas fa-ban text-danger"></i> Exclude programs from being monitored
+                        <div class="card-body text-center">
+                            <div class="input-group mb-3" style="cursor: pointer">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="exclude_app" accept=".exe">
+                                    <label class="custom-file-label text-left" for="exclude_app" id="exclude_app_label">Browse
+                                        for the program</label>
                                 </div>
-                                <div class="card-body text-center">
-                                    <div class="input-group mb-3" style="cursor: pointer">
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" id="exclude_app" accept=".exe">
-                                            <label class="custom-file-label text-left" for="exclude_app" id="exclude_app_label">Browse for the program</label>
-                                        </div>
-                                        <div class="input-group-append">
-                                            <button class="btn btn-success" type="button" id="exclude_app_button">Exclude</button>
-                                        </div>
-                                    </div>
-                                    or <br>
-                                    <button type="button" class="btn btn-primary mt-3 btn-block" data-toggle="modal" data-target="#process_list_modal" id="open_process_list">
-                                        Choose program from running processes
-                                    </button>
-                                    <hr>
-                                    <ul class="list-group">
-                                        {% for app in exclude %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center" id="{{ app }}_list">
-                                                {{ app }}
-                                                <span class="badge"><i class="fas fa-minus text-danger exclude_app" style="cursor: pointer" id="{{ app }}"></i></span>
-                                            </li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="card border-danger">
-                                <div class="card-header bg-danger-t">
-                                    <i class="fas fa-trash-alt text-danger"></i>
-                                    <span class="text-danger"> Delete all collected data</span>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row col-lg-12 text-danger">
-                                        Delete all the data collected by Activity Monitor. <br>
-                                        This includes,
-                                        <ul>
-                                            <li>App Usage</li>
-                                            <li>Statistics</li>
-                                            <li>Window Names</li>
-                                            <li>Screenshots</li>
-                                            <li>Keystrokes</li>
-                                        </ul>
-                                    </div>
-                                    <button id="delete_all" class="btn btn-danger btn-block" type="button" onclick="delete_all()">
-                                        <span id="delete-btn-text">Delete All</span>
-                                        <span id="delete-spinner" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" style="display: none"></span>
-                                        <span id="delete-text" style="display: none">Deleting...</span>
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" type="button" id="exclude_app_button">Exclude
                                     </button>
                                 </div>
                             </div>
+                            or <br>
+                            <button type="button" class="btn btn-primary mt-3 btn-block" data-toggle="modal"
+                                    data-target="#process_list_modal" id="open_process_list">
+                                Choose program from running processes
+                            </button>
+                            <hr>
+                            <ul class="list-group">
+                                {% for app in exclude %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                                        id="{{ app }}_list">
+                                        {{ app }}
+                                        <span class="badge"><i class="fas fa-minus text-danger exclude_app"
+                                                               style="cursor: pointer" id="{{ app }}"></i></span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         </div>
                     </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger-t">
+                            <i class="fas fa-trash-alt text-danger"></i>
+                            <span class="text-danger"> Delete all collected data</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row col-lg-12 text-danger">
+                                Delete all the data collected by Activity Monitor. <br>
+                                This includes,
+                                <ul>
+                                    <li>App Usage</li>
+                                    <li>Statistics</li>
+                                    <li>Window Names</li>
+                                    <li>Screenshots</li>
+                                    <li>Keystrokes</li>
+                                    <li>Attention Details</li>
+                                    <li>Website Visits</li>
+                                    <li>Video Monitoring</li>
+                                </ul>
+                            </div>
+                            <button id="delete_all" class="btn btn-danger btn-block" type="button"
+                                    onclick="delete_all()">
+                                <span id="delete-btn-text">Delete All</span>
+                                <span id="delete-spinner" class="spinner-grow spinner-grow-sm" role="status"
+                                      aria-hidden="true" style="display: none"></span>
+                                <span id="delete-text" style="display: none">Deleting...</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    {% if date and no_data == 0 %}
-                    <div class="row" id="det">
-                        <div class="col-lg-12">
-                            <div class="card mb-3">
-                                <div class="card-header">
-                                    <i class="fas fa-link"></i>
-                                    View detailed information
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="accordion col-lg-6 sol-sm-6" id="leftAccord">
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <div class="row">
-                                                        <div class="col-9">
-                                                            <b class="text-primary"><i class="fas fa-fw fa-chart-area"></i> App Usage</b><br>
-                                                            <small class="text-muted">View individual app usage times, idle time and timeline.</small>
-                                                        </div>
-                                                        <div class="col-3 text-right">
-                                                            <a class="btn btn-primary" href="../usage/{{ date }}">View</a>
-                                                        </div>
+            {% if date and no_data == 0 %}
+                <div class="row" id="det">
+                    <div class="col-lg-12">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <i class="fas fa-link"></i>
+                                View detailed information
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="accordion col-lg-6 sol-sm-6" id="leftAccord">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <b class="text-primary"><i class="fas fa-fw fa-chart-area"></i>
+                                                            App Usage</b><br>
+                                                        <small class="text-muted">View individual app usage times, idle
+                                                            time and timeline.
+                                                        </small>
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <div class="row">
-                                                        <div class="col-9">
-                                                            <b class="text-primary"><i class="fas fa-fw fa-chart-bar"></i> Statistics</b><br>
-                                                            <small class="text-muted">View total up time, most used apps, browser usage etc..</small>
-                                                        </div>
-                                                        <div class="col-3 text-right">
-                                                            <a class="btn btn-primary" href="../statistics/{{ date }}">View</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <div class="row">
-                                                        <div class="col-9">
-                                                            <b class="text-primary"><i class="fas fa-fw fa-window-restore"></i> Windows</b><br>
-                                                            <small class="text-muted">View individual window names that user has opened.</small>
-                                                        </div>
-                                                        <div class="col-3 text-right">
-                                                            <a class="btn btn-primary" href="../windows/{{ date }}">View</a>
-                                                        </div>
+                                                    <div class="col-3 text-right">
+                                                        <a class="btn btn-primary" href="../usage/{{ date }}">View</a>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="accordion col-lg-6 sol-sm-6" id="rightAccord">
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <div class="row">
-                                                        <div class="col-9">
-                                                            <b class="text-primary"><i class="fas fa-fw fa-desktop"></i> Screenshots</b><br>
-                                                            <small class="text-muted">View screenshots of the applications user has used.</small>
-                                                        </div>
-                                                        <div class="col-3 text-right">
-                                                            <a class="btn btn-primary" href="../screenshots/{{ date }}">View</a>
-                                                        </div>
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <b class="text-primary"><i class="fas fa-fw fa-chart-bar"></i>
+                                                            Statistics</b><br>
+                                                        <small class="text-muted">View total up time, most used apps,
+                                                            browser usage etc..
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-3 text-right">
+                                                        <a class="btn btn-primary"
+                                                           href="../statistics/{{ date }}">View</a>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <div class="card">
-                                                <div class="card-header">
-                                                    <div class="row">
-                                                        <div class="col-9">
-                                                            <b class="text-primary"><i class="fas fa-fw fa-keyboard"></i> Keystrokes</b><br>
-                                                            <small class="text-muted">View what the user has typed on different applications.</small>
-                                                        </div>
-                                                        <div class="col-3 text-right">
-                                                            <a class="btn btn-primary" href="../keystrokes/{{ date }}">View</a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="card" >
-                                                <div class="card-header">
-                                                    <div class="row">
-                                                        <div class="col-9">
-                                                            <b class="text-danger"><i class="fas fa-trash-alt"></i>  Delete all data for {{ date }}</b><br>
-                                                            <small class="text-muted" style="cursor: pointer" data-toggle="collapse" data-target="#collapse_delete" aria-expanded="true" aria-controls="collapse_delete">Click here to see what will be deleted.<i class="fas fa-fw fa-angle-down"></i></small>
-                                                        </div>
-                                                        <div class="col-3 text-right">
-                                                            <button id="delete_for_date" class="btn btn-danger" type="button" onclick="delete_for_date()">
-                                                                <span id="delete-date-btn-text"><i class="fas fa-trash-alt"></i></span>
-                                                                <span id="delete-date-spinner" class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" style="display: none"></span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div id="collapse_delete" class="collapse" data-parent="#rightAccord">
-                                                    <div class="card-body small text-danger">
-                                                        Delete all the data collected for {{ date }}. <br>
-                                                        This includes, 
-                                                        <ul>
-                                                            <li>App Usage</li>
-                                                            <li>Statistics</li>
-                                                            <li>Window Names</li>
-                                                            <li>Screenshots</li>
-                                                            <li>Keystrokes</li>
-                                                        </ul>                                                        
-                                                    </div>
-                                                </div>
-                                            </div>
-
                                         </div>
+
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <b class="text-primary"><i
+                                                                class="fas fa-fw fa-window-restore"></i> Windows</b><br>
+                                                        <small class="text-muted">View individual window names that user
+                                                            has opened.
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-3 text-right">
+                                                        <a class="btn btn-primary" href="../windows/{{ date }}">View</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion col-lg-6 sol-sm-6" id="rightAccord">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <b class="text-primary"><i class="fas fa-fw fa-desktop"></i>
+                                                            Screenshots</b><br>
+                                                        <small class="text-muted">View screenshots of the applications
+                                                            user has used.
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-3 text-right">
+                                                        <a class="btn btn-primary"
+                                                           href="../screenshots/{{ date }}">View</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <b class="text-primary"><i class="fas fa-fw fa-keyboard"></i>
+                                                            Keystrokes</b><br>
+                                                        <small class="text-muted">View what the user has typed on
+                                                            different applications.
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-3 text-right">
+                                                        <a class="btn btn-primary"
+                                                           href="../keystrokes/{{ date }}">View</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <b class="text-danger"><i class="fas fa-trash-alt"></i> Delete
+                                                            all data for {{ date }}</b><br>
+                                                        <small class="text-muted" style="cursor: pointer"
+                                                               data-toggle="collapse" data-target="#collapse_delete"
+                                                               aria-expanded="true" aria-controls="collapse_delete">
+                                                            Click here to see what will be deleted.<i
+                                                                class="fas fa-fw fa-angle-down"></i></small>
+                                                    </div>
+                                                    <div class="col-3 text-right">
+                                                        <button id="delete_for_date" class="btn btn-danger"
+                                                                type="button" onclick="delete_for_date()">
+                                                            <span id="delete-date-btn-text"><i
+                                                                    class="fas fa-trash-alt"></i></span>
+                                                            <span id="delete-date-spinner"
+                                                                  class="spinner-grow spinner-grow-sm" role="status"
+                                                                  aria-hidden="true" style="display: none"></span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div id="collapse_delete" class="collapse" data-parent="#rightAccord">
+                                                <div class="card-body small text-danger">
+                                                    Delete all the data collected for {{ date }}. <br>
+                                                    This includes,
+                                                    <ul>
+                                                        <li>App Usage</li>
+                                                        <li>Statistics</li>
+                                                        <li>Window Names</li>
+                                                        <li>Screenshots</li>
+                                                        <li>Keystrokes</li>
+                                                        <li>Attention Details</li>
+                                                        <li>Website Visits</li>
+                                                        <li>Video Monitoring</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                {% endif %}
-
                 </div>
-                <!-- /.container-fluid -->
-
-                <!-- Sticky Footer -->
-                <footer class="sticky-footer">
-                    <div class="container my-auto">
-                        <div class="copyright text-center my-auto">
-                            <span>Copyright © Activity Monitor - 2019</span>
-                        </div>
-                    </div>
-                </footer>
-
-            </div>
-            <!-- /.content-wrapper -->
-
-        </div>
-        <!-- /#wrapper -->
-
-        <!-- Scroll to Top Button-->
-        <a class="scroll-to-top rounded" href="#page-top">
-            <i class="fas fa-angle-up"></i>
-        </a>
-
-        <!-- Modal -->
-        <div class="modal fade" id="process_list_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Choose processes to exclude</h5>
-                        <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
-                            <span>&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body" id="process_list_body">
-                        <div class="text-center">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bootstrap core JavaScript-->
-        <script src="{{ url_for('static', filename='jquery.min.js' ) }}"></script>
-        <script src="{{ url_for('static', filename='bootstrap.bundle.min.js' ) }}"></script>
-
-        <!-- Core plugin JavaScript-->
-        <script src="{{ url_for('static', filename='jquery.easing.min.js' ) }}"></script>
-
-        <!-- Custom scripts for all pages-->
-        <script src="{{ url_for('static', filename='sb-admin.min.js' ) }}"></script>
-
-        <!-- Custom scripts for all pages-->
-        <script src="{{ url_for('static', filename='datepicker.js' ) }}"></script>
-        <script src="{{ url_for('static', filename='datepicker.en.js' ) }}"></script>
-
-        <!-- Toast -->
-        <script src="{{ url_for('static', filename='native-toast.js' ) }}"></script>
-
-
-
-        <script>
-            $(document).ready(function(){
-                $(function () {
-                    $('[data-toggle="tooltip"]').tooltip()
-                });
-
-                {% if date and no_data == 0 %}
-                    $('html, body').animate({
-                        scrollTop: $("#det").offset().top
-                    }, 1000);
-                {% endif %}
-
-                window.setInterval(function(){
-                    $.ajax({
-                        url:"/tracker/isRunning",
-                        method:"POST",
-                        data:{},
-                        success:function(response){
-                            $('#overlay').css('display', 'none');
-                            if (response == '1') {
-                                $('#init_tracker').css('display', 'none');
-                                $('#start_tracker').css('display', 'none');
-                                $('.stop-spin').css('display', 'none');
-                                $('#stop_tracker').css('display', 'block');
-                                $('#stop_tracker').removeAttr('disabled');
-                                $('#running_spinner').css('display', 'inline-block');
-                            }
-                            else if (response == '0'){
-                                $('#init_tracker').css('display', 'none');
-                                $('#start_tracker').css('display', 'block');
-                                $('.start-spin').css('display', 'none');
-                                $('#stop_tracker').css('display', 'none');
-                                $('#start_tracker').removeAttr('disabled');
-                                $('#running_spinner').css('display', 'none');
-                            }
-                        },
-                        error: function() {
-                            console.log("Error");
-                            $('#overlay').css('display', 'block');
-                        }
-                    });
-                }, 3000);
-            });
-
-            function start_tracker(){
-                $('#start_tracker').attr('disabled', true);
-                $('.btn-text-span').css('display', 'none');
-                $('.start-spin').css('display', 'inline-block');
-                $('.please-wait-text').css('display', 'none');
-                $.ajax({
-                    url:"/tracker/start_tracker",
-                    method:"POST",
-                    data:{},
-                    success:function(msg){
-                        if (msg == 'successful')
-                        {
-                            $('#start_tracker').css('display', 'none');
-                            $('.btn-text-span').css('display', 'inline-block');
-                            $('.start-spin').css('display', 'none');
-                            $('#stop_tracker').removeAttr('disabled');
-                            $('#stop_tracker').css('display', 'block');
-                            nativeToast({
-                                message: 'Activity tracker is running',
-                                position: 'bottom',
-                                timeout: 3000,
-                                type: 'success',
-                                edge: true
-                            });
-                        }
-                        else if (msg == 'no_eula') {
-                            window.location.href = "http://localhost:{{ port }}/EULA"
-                        }
-                    }
-                });
-                return 1;
-            }
-
-            function stop_tracker(){
-                $('.btn-text-span').css('display', 'none');
-                $('.stop-spin').css('display', 'inline-block');
-                $('#stop_tracker').attr('disabled', true);
-                $.ajax({
-                    url:"/tracker/stop_tracker",
-                    method:"POST",
-                    data:{},
-                    success:function(){
-                        $('.stop-spin').css('display', 'none');
-                        $('#start-spinner').css('display', 'none');
-                        $('.btn-text-span').css('display', 'none');
-                        $('.please-wait-text').css('display', 'inline-block');
-                        $('#start_tracker').css('display', 'block');
-                        $('#stop_tracker').css('display', 'none');
-                        nativeToast({
-                            message: 'Activity tracker stopped successfully',
-                            position: 'bottom',
-                            timeout: 3000,
-                            type: 'success',
-                            edge: true
-                        });
-                        setTimeout(function () {
-                            $('.btn-text-span').css('display', 'block');
-                            $('#start_tracker').removeAttr('disabled');
-                            $('.please-wait-text').css('display', 'none');
-                            $('.start-spin').css('display', 'none');
-                        }, 2000);
-                    }
-                });
-                return 1;
-            }
-
-            $('#interval_select').change(function(){
-                $.ajax({
-                    url:"/tracker/interval",
-                    method:"POST",
-                    data:{i: this.value},
-                    success:function(r){
-                        nativeToast({
-                            message: 'Interval successfully set to ' + r + ' minute(s)',
-                            position: 'bottom',
-                            timeout: 3000,
-                            type: 'success',
-                            edge: true
-                        })
-                    }
-                });
-            });
-                        
-            var dp = $('#datepick').datepicker({
-                language: 'en',
-                firstDay: 1,
-                todayButton: new Date(),
-                dateFormat: "yyyy-mm-dd",
-                inline: true,                      
-                maxDate: new Date(),              
-                onSelect(formattedDate, date, inst){                       
-                    $('.alert').alert('close');
-                    $('#det').css('display', 'none');
-                    $('#view').attr('disabled', true);
-                    {% if not date %}
-                    $('#date_form').attr('action', 'dash/' + $('#datepick').val());                    
-                    {% endif %}
-                    {% if date %}
-                    $('#date_form').attr('action', $('#datepick').val());  
-                    $('#navs').css('display', 'none');
-                    {% endif %}
-
-                    $.ajax({
-                        url: "/tracker/no_data",
-                        method: "POST",
-                        data: {date: $('#datepick').val() },
-                        success: function (result) {
-                            console.log(result);
-                            if (result == 1) {
-                                $('#view').attr('disabled', true);
-                                $('#view').addClass('btn-danger');
-                                $('#view').css('display', 'block');
-                                if ($('#datepick').val() == ''){
-                                    d = 'Select a date';
-                                }
-                                else {
-                                    d = 'No data on ' + $('#datepick').val();
-                                }
-                                $('#view').html(d);
-                            }
-                            else {
-                                $('#view').removeAttr('disabled');
-                                $('#view').addClass('btn-success');
-                                $('#view').removeClass('btn-danger');
-                                $('#view').css('display', 'block');
-                                $('#view').html('Load Data');
-                            }
-                        }
-                    });
-                }
-            }).data('datepicker');
-
-            $('#view').click(function(event){
-                if($('#datepick').val().length < 8){
-                    event.preventDefault();
-                    $('#select_alert').css('display', 'block');
-                }
-            });
-
-            {% if date %}
-            dp.selectDate(new Date('{{date}}'));
-            $('#det').css('display', 'block');
-            $('#view').css('display', 'none');
-            $('#navs').css('display', 'block');
             {% endif %}
 
+        </div>
+        <!-- /.container-fluid -->
 
-            function delete_all() {
-                var con = confirm("You are about to delete all the data from Activity Monitor. This action cannot be undone. \n\nProceed?");
-                if (con == true) {
-                    $('#delete-btn-text').css('display', 'none');
-                    $('#delete-spinner').css('display', 'inline-block');
-                    $('#delete-text').css('display', 'inline-block');
-                    $('#delete_all').attr('disabled', true);
-                    $.ajax({
-                        url:"/tracker/stop_tracker",
-                        method:"POST",
-                        data:{i: this.value},
-                        success:function(r){
-                            if (r == 'successfully stopped') {
-                                $.ajax({
-                                    url: "/tracker/delete_all",
-                                    method: "POST",
-                                    data: {},
-                                    success: function (result) {
-                                        console.log(result);
-                                        if (result == '12' || result == '13' || result == '32' || result == '33') {
-                                            nativeToast({
-                                                message: 'All records deleted.',
-                                                position: 'bottom',
-                                                timeout: 3000,
-                                                type: 'success',
-                                                edge: true
-                                            })
-                                        } else {
-                                            nativeToast({
-                                                message: 'Could not delete data. Close all other windows and try again.',
-                                                position: 'bottom',
-                                                timeout: 3000,
-                                                type: 'error',
-                                                edge: true
-                                            })
-                                        }
-                                        $('#delete-btn-text').css('display', 'inline-block');
-                                        $('#delete-spinner').css('display', 'none');
-                                        $('#delete-text').css('display', 'none');
-                                        $('#delete_all').removeAttr('disabled');
-                                    }
-                                });
-                            }
-                        }
-                    });
-                }
-            }
+        <!-- Sticky Footer -->
+        <footer class="sticky-footer">
+            <div class="container my-auto">
+                <div class="copyright text-center my-auto">
+                    <span>Copyright © Activity Monitor - 2019</span>
+                </div>
+            </div>
+        </footer>
 
-            function delete_for_date() {
-                $('#delete-date-btn-text').css('display', 'none');
-                $('#delete-date-spinner').css('display', 'inline-block');
-                $('#delete_for_date').attr('disabled', true);
-                var conf = confirm("You are about to delete data for {{ date }} from Activity Monitor. This action cannot be undone. \n\nProceed?");
-                if (conf == true) {
-                    $.ajax({
-                        url:"/tracker/stop_tracker",
-                        method:"POST",
-                        data:{i: this.value},
-                        success:function(re){
-                            if (re == 'successfully stopped') {
-                                $.ajax({
-                                    url: "/tracker/delete_for_date",
-                                    method: "POST",
-                                    data: {date: '{{ date }}' },
-                                    success: function (result) {
-                                        console.log(result);
-                                        if (result == '12' || result == '13' || result == '32' || result == '33') {
-                                            nativeToast({
-                                                message: 'All records deleted.',
-                                                position: 'bottom',
-                                                timeout: 3000,
-                                                type: 'success',
-                                                edge: true
-                                            })
-                                        } else {
-                                            nativeToast({
-                                                message: 'Could not delete data. Close all other windows and try again.',
-                                                position: 'bottom',
-                                                timeout: 3000,
-                                                type: 'error',
-                                                edge: true
-                                            })
-                                        }
-                                        $('#delete-date-btn-text').css('display', 'inline-block');
-                                        $('#delete-date-spinner').css('display', 'none');
-                                        $('#delete_for_date').removeAttr('disabled');
-                                    }
-                                });
-                            }
-                        }
-                    });
-                }
-                else {
-                    $('#delete-date-btn-text').css('display', 'inline-block');
-                    $('#delete-date-spinner').css('display', 'none');
-                    $('#delete_for_date').removeAttr('disabled');
-                }
-            }
+    </div>
+    <!-- /.content-wrapper -->
 
-            $('#start_check').change(function () {
-                if ($('#start_check').is(":checked")) {
-                    $.ajax({
-                        url:"/tracker/check_autostart",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-                else {
-                    $.ajax({
-                        url:"/tracker/uncheck_autostart",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-            });
+</div>
+<!-- /#wrapper -->
 
-            $('#windows_start_check').change(function () {
-                if ($('#windows_start_check').is(":checked")) {
-                    $.ajax({
-                        url:"/tracker/check_autostart_windows",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-                else {
-                    $.ajax({
-                        url:"/tracker/uncheck_autostart_windows",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-            });
+<!-- Scroll to Top Button-->
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
 
-            $('#delete_30').change(function () {
-                if ($('#delete_30').is(":checked")) {
-                    $.ajax({
-                        url:"/tracker/check_delete_30",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-                else {
-                    $.ajax({
-                        url:"/tracker/uncheck_delete_30",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-            });
+<!-- Modal -->
+<div class="modal fade" id="process_list_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Choose processes to exclude</h5>
+                <button type="button" class="close text-danger" data-dismiss="modal" aria-label="Close">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="process_list_body">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-            $('#disable_ss').change(function () {
-                if ($('#disable_ss').is(":checked")) {
-                    $.ajax({
-                        url:"/tracker/check_disable_ss",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-                else {
-                    $.ajax({
-                        url:"/tracker/uncheck_disable_ss",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-            });
+<!-- Bootstrap core JavaScript-->
+<script src="{{ url_for('static', filename='jquery.min.js' ) }}"></script>
+<script src="{{ url_for('static', filename='bootstrap.bundle.min.js' ) }}"></script>
 
-            $('#disable_keylog').change(function () {
-                if ($('#disable_keylog').is(":checked")) {
-                    $.ajax({
-                        url:"/tracker/check_disable_keylog",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-                else {
-                    $.ajax({
-                        url:"/tracker/uncheck_disable_keylog",
-                        method:"POST",
-                        data:{},
-                        success:function(){
-                            nativeToast({
-                                message: 'Saved',
-                                position: 'bottom',
-                                timeout: 1500,
-                                type: 'success',
-                                edge: true
-                            })
-                        }
-                    });
-                }
-            });
+<!-- Core plugin JavaScript-->
+<script src="{{ url_for('static', filename='jquery.easing.min.js' ) }}"></script>
 
-            $('#exclude_app').change(function(e){
-                var fileName = e.target.files[0].name;
-                $('#exclude_app_label').html(fileName);
-            });
+<!-- Custom scripts for all pages-->
+<script src="{{ url_for('static', filename='sb-admin.min.js' ) }}"></script>
 
-            $('#exclude_app_button').click(function(e){
-                var app = $('#exclude_app_label').html();
-                if (app != 'Browse for the program') {
-                    $.ajax({
-                        url:"/tracker/add_exclude_app",
-                        method:"POST",
-                        data:{app: app},
-                        success:function(){
-                            window.location.reload();
-                        }
-                    });
-                }
-            });
+<!-- Custom scripts for all pages-->
+<script src="{{ url_for('static', filename='datepicker.js' ) }}"></script>
+<script src="{{ url_for('static', filename='datepicker.en.js' ) }}"></script>
 
-            $('.exclude_app').click(function(e){
-                var app = $(this).attr('id');
-                var con = confirm("You are about to remove " + app + " from the excluded apps.\n\nProceed?");
-                if (con == true) {
-                    $.ajax({
-                        url: "/tracker/remove_exclude_app",
-                        method: "POST",
-                        data: {app: app},
-                        success: function () {
-                            window.location.reload();
-                        }
-                    });
-                }
+<!-- Toast -->
+<script src="{{ url_for('static', filename='native-toast.js' ) }}"></script>
 
-            });
 
-            $('#open_process_list').click(function(){
-                $.ajax({
-                    url: "/tracker/get_process_list",
-                    method: "POST",
-                    data: {},
-                    success: function (data) {
-                        $('#process_list_body').html(data);
+<script>
+    $(document).ready(function () {
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        });
+
+        {% if date and no_data == 0 %}
+            $('html, body').animate({
+                scrollTop: $("#det").offset().top
+            }, 1000);
+        {% endif %}
+
+        window.setInterval(function () {
+            $.ajax({
+                url: "/tracker/isRunning",
+                method: "POST",
+                data: {},
+                success: function (response) {
+                    $('#overlay').css('display', 'none');
+                    if (response == '1') {
+                        $('#init_tracker').css('display', 'none');
+                        $('#start_tracker').css('display', 'none');
+                        $('.stop-spin').css('display', 'none');
+                        $('#stop_tracker').css('display', 'block');
+                        $('#stop_tracker').removeAttr('disabled');
+                        $('#running_spinner').css('display', 'inline-block');
+                    } else if (response == '0') {
+                        $('#init_tracker').css('display', 'none');
+                        $('#start_tracker').css('display', 'block');
+                        $('.start-spin').css('display', 'none');
+                        $('#stop_tracker').css('display', 'none');
+                        $('#start_tracker').removeAttr('disabled');
+                        $('#running_spinner').css('display', 'none');
                     }
-                });
+                },
+                error: function () {
+                    console.log("Error");
+                    $('#overlay').css('display', 'block');
+                }
             });
+        }, 3000);
+    });
+
+    function start_tracker() {
+        $('#start_tracker').attr('disabled', true);
+        $('.btn-text-span').css('display', 'none');
+        $('.start-spin').css('display', 'inline-block');
+        $('.please-wait-text').css('display', 'none');
+        $.ajax({
+            url: "/tracker/start_tracker",
+            method: "POST",
+            data: {},
+            success: function (msg) {
+                if (msg == 'successful') {
+                    $('#start_tracker').css('display', 'none');
+                    $('.btn-text-span').css('display', 'inline-block');
+                    $('.start-spin').css('display', 'none');
+                    $('#stop_tracker').removeAttr('disabled');
+                    $('#stop_tracker').css('display', 'block');
+                    nativeToast({
+                        message: 'Activity tracker is running',
+                        position: 'bottom',
+                        timeout: 3000,
+                        type: 'success',
+                        edge: true
+                    });
+                } else if (msg == 'no_eula') {
+                    window.location.href = "http://localhost:{{ port }}/EULA"
+                }
+            }
+        });
+        return 1;
+    }
+
+    function stop_tracker() {
+        $('.btn-text-span').css('display', 'none');
+        $('.stop-spin').css('display', 'inline-block');
+        $('#stop_tracker').attr('disabled', true);
+        $.ajax({
+            url: "/tracker/stop_tracker",
+            method: "POST",
+            data: {},
+            success: function () {
+                $('.stop-spin').css('display', 'none');
+                $('#start-spinner').css('display', 'none');
+                $('.btn-text-span').css('display', 'none');
+                $('.please-wait-text').css('display', 'inline-block');
+                $('#start_tracker').css('display', 'block');
+                $('#stop_tracker').css('display', 'none');
+                nativeToast({
+                    message: 'Activity tracker stopped successfully',
+                    position: 'bottom',
+                    timeout: 3000,
+                    type: 'success',
+                    edge: true
+                });
+                setTimeout(function () {
+                    $('.btn-text-span').css('display', 'block');
+                    $('#start_tracker').removeAttr('disabled');
+                    $('.please-wait-text').css('display', 'none');
+                    $('.start-spin').css('display', 'none');
+                }, 2000);
+            }
+        });
+        return 1;
+    }
+
+    $('#interval_select').change(function () {
+        $.ajax({
+            url: "/tracker/interval",
+            method: "POST",
+            data: {i: this.value},
+            success: function (r) {
+                nativeToast({
+                    message: 'Interval successfully set to ' + r + ' minute(s)',
+                    position: 'bottom',
+                    timeout: 3000,
+                    type: 'success',
+                    edge: true
+                })
+            }
+        });
+    });
+
+    var dp = $('#datepick').datepicker({
+        language: 'en',
+        firstDay: 1,
+        todayButton: new Date(),
+        dateFormat: "yyyy-mm-dd",
+        inline: true,
+        maxDate: new Date(),
+        onSelect(formattedDate, date, inst) {
+            $('.alert').alert('close');
+            $('#det').css('display', 'none');
+            $('#view').attr('disabled', true);
+            {% if not date %}
+                $('#date_form').attr('action', 'dash/' + $('#datepick').val());
+            {% endif %}
+            {% if date %}
+                $('#date_form').attr('action', $('#datepick').val());
+                $('#navs').css('display', 'none');
+            {% endif %}
+
+            $.ajax({
+                url: "/tracker/no_data",
+                method: "POST",
+                data: {date: $('#datepick').val()},
+                success: function (result) {
+                    console.log(result);
+                    if (result == 1) {
+                        $('#view').attr('disabled', true);
+                        $('#view').addClass('btn-danger');
+                        $('#view').css('display', 'block');
+                        if ($('#datepick').val() == '') {
+                            d = 'Select a date';
+                        } else {
+                            d = 'No data on ' + $('#datepick').val();
+                        }
+                        $('#view').html(d);
+                    } else {
+                        $('#view').removeAttr('disabled');
+                        $('#view').addClass('btn-success');
+                        $('#view').removeClass('btn-danger');
+                        $('#view').css('display', 'block');
+                        $('#view').html('Load Data');
+                    }
+                }
+            });
+        }
+    }).data('datepicker');
+
+    $('#view').click(function (event) {
+        if ($('#datepick').val().length < 8) {
+            event.preventDefault();
+            $('#select_alert').css('display', 'block');
+        }
+    });
+
+    {% if date %}
+        dp.selectDate(new Date('{{date}}'));
+        $('#det').css('display', 'block');
+        $('#view').css('display', 'none');
+        $('#navs').css('display', 'block');
+    {% endif %}
 
 
-            function exclude_from_list(a){
-                var app = $(a).attr('process');
-                $.ajax({
-                    url:"/tracker/add_exclude_app",
-                    method:"POST",
-                    data:{app: app},
-                    success:function(){
-                        $(a).css('display', 'none');
-                        nativeToast({
-                            message: 'Excluded',
-                            position: 'bottom',
-                            timeout: 1000,
-                            type: 'success',
-                            edge: true
+    function delete_all() {
+        var con = confirm("You are about to delete all the data from Activity Monitor. This action cannot be undone. \n\nProceed?");
+        if (con == true) {
+            $('#delete-btn-text').css('display', 'none');
+            $('#delete-spinner').css('display', 'inline-block');
+            $('#delete-text').css('display', 'inline-block');
+            $('#delete_all').attr('disabled', true);
+            $.ajax({
+                url: "/tracker/stop_tracker",
+                method: "POST",
+                data: {i: this.value},
+                success: function (r) {
+                    if (r == 'successfully stopped') {
+                        $.ajax({
+                            url: "/tracker/delete_all",
+                            method: "POST",
+                            data: {},
+                            success: function (result) {
+                                console.log(result);
+                                if (result == '12' || result == '13' || result == '32' || result == '33') {
+                                    nativeToast({
+                                        message: 'All records deleted.',
+                                        position: 'bottom',
+                                        timeout: 1000,
+                                        type: 'success',
+                                        edge: true
+                                    })
+                                     setTimeout(function () {
+                                        window.location.reload();
+                                    }, 1000);
+                                } else {
+                                    nativeToast({
+                                        message: 'Could not delete data. Close all other windows and try again.',
+                                        position: 'bottom',
+                                        timeout: 3000,
+                                        type: 'error',
+                                        edge: true
+                                    })
+                                }
+                                $('#delete-btn-text').css('display', 'inline-block');
+                                $('#delete-spinner').css('display', 'none');
+                                $('#delete-text').css('display', 'none');
+                                $('#delete_all').removeAttr('disabled');
+                            }
                         });
                     }
+                }
+            });
+        }
+    }
+
+    function delete_for_date() {
+        $('#delete-date-btn-text').css('display', 'none');
+        $('#delete-date-spinner').css('display', 'inline-block');
+        $('#delete_for_date').attr('disabled', true);
+        var conf = confirm("You are about to delete data for {{ date }} from Activity Monitor. This action cannot be undone. \n\nProceed?");
+        if (conf == true) {
+            $.ajax({
+                url: "/tracker/stop_tracker",
+                method: "POST",
+                data: {i: this.value},
+                success: function (re) {
+                    if (re == 'successfully stopped') {
+                        $.ajax({
+                            url: "/tracker/delete_for_date",
+                            method: "POST",
+                            data: {date: '{{ date }}'},
+                            success: function (result) {
+                                console.log(result);
+                                if (result == '12' || result == '13' || result == '32' || result == '33') {
+                                    nativeToast({
+                                        message: 'All records deleted.',
+                                        position: 'bottom',
+                                        timeout: 1000,
+                                        type: 'success',
+                                        edge: true
+                                    })
+                                    setTimeout(function () {
+                                        window.location.reload();
+                                    }, 1000);
+                                } else {
+                                    nativeToast({
+                                        message: 'Could not delete data. Close all other windows and try again.',
+                                        position: 'bottom',
+                                        timeout: 3000,
+                                        type: 'error',
+                                        edge: true
+                                    })
+                                }
+                                $('#delete-date-btn-text').css('display', 'inline-block');
+                                $('#delete-date-spinner').css('display', 'none');
+                                $('#delete_for_date').removeAttr('disabled');
+                            }
+                        });
+                    }
+                }
+            });
+        } else {
+            $('#delete-date-btn-text').css('display', 'inline-block');
+            $('#delete-date-spinner').css('display', 'none');
+            $('#delete_for_date').removeAttr('disabled');
+        }
+    }
+
+    $('#start_check').change(function () {
+        if ($('#start_check').is(":checked")) {
+            $.ajax({
+                url: "/tracker/check_autostart",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/tracker/uncheck_autostart",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        }
+    });
+
+    $('#windows_start_check').change(function () {
+        if ($('#windows_start_check').is(":checked")) {
+            $.ajax({
+                url: "/tracker/check_autostart_windows",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/tracker/uncheck_autostart_windows",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        }
+    });
+
+    $('#delete_30').change(function () {
+        if ($('#delete_30').is(":checked")) {
+            $.ajax({
+                url: "/tracker/check_delete_30",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/tracker/uncheck_delete_30",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        }
+    });
+
+    $('#disable_ss').change(function () {
+        if ($('#disable_ss').is(":checked")) {
+            $.ajax({
+                url: "/tracker/check_disable_ss",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/tracker/uncheck_disable_ss",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        }
+    });
+
+    $('#disable_keylog').change(function () {
+        if ($('#disable_keylog').is(":checked")) {
+            $.ajax({
+                url: "/tracker/check_disable_keylog",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/tracker/uncheck_disable_keylog",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        }
+    });
+
+    $('#exclude_app').change(function (e) {
+        var fileName = e.target.files[0].name;
+        $('#exclude_app_label').html(fileName);
+    });
+
+    $('#exclude_app_button').click(function (e) {
+        var app = $('#exclude_app_label').html();
+        if (app != 'Browse for the program') {
+            $.ajax({
+                url: "/tracker/add_exclude_app",
+                method: "POST",
+                data: {app: app},
+                success: function () {
+                    window.location.reload();
+                }
+            });
+        }
+    });
+
+    $('.exclude_app').click(function (e) {
+        var app = $(this).attr('id');
+        var con = confirm("You are about to remove " + app + " from the excluded apps.\n\nProceed?");
+        if (con == true) {
+            $.ajax({
+                url: "/tracker/remove_exclude_app",
+                method: "POST",
+                data: {app: app},
+                success: function () {
+                    window.location.reload();
+                }
+            });
+        }
+
+    });
+
+    $('#open_process_list').click(function () {
+        $.ajax({
+            url: "/tracker/get_process_list",
+            method: "POST",
+            data: {},
+            success: function (data) {
+                $('#process_list_body').html(data);
+            }
+        });
+    });
+
+
+    function exclude_from_list(a) {
+        var app = $(a).attr('process');
+        $.ajax({
+            url: "/tracker/add_exclude_app",
+            method: "POST",
+            data: {app: app},
+            success: function () {
+                $(a).css('display', 'none');
+                nativeToast({
+                    message: 'Excluded',
+                    position: 'bottom',
+                    timeout: 1000,
+                    type: 'success',
+                    edge: true
                 });
             }
+        });
+    }
 
-            $('#process_list_modal').on('hidden.bs.modal', function (e) {
-                window.location.reload();
-            })
-        </script>
-    </body>
+    $('#process_list_modal').on('hidden.bs.modal', function (e) {
+        window.location.reload();
+    })
+</script>
+</body>
 </html>
