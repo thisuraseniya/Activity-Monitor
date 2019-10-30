@@ -6,3 +6,4 @@ build
 dist
 Activity Monitor.exe
 test.py
+app.spec
