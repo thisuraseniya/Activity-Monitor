@@ -117,7 +117,7 @@ def create_database():
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS key_logger_new ( id INTEGER PRIMARY KEY, window TEXT, p_name TEXT,
                    d TEXT,
                    t TEXT,
-                   content TEXT, characters TEXT)''')
+                   content TEXT, characters TEXT, copy TEXT, paste TEXT)''')
 
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS downloads ( id INTEGER PRIMARY KEY, file TEXT, path TEXT,
             d TEXT,
@@ -187,7 +187,7 @@ def screen_shot(ss_name):
 def video_monitor_main(kill_flag):
     global BROWSER_FLAG, db_path, SCROLLED
     time_loop = 60
-    while not kill_flag.isSet():
+    while not kill_flag.isSet() and options["disable_attention"] == 0:
         if SCROLLED == 0 and BROWSER_FLAG:
             if time_loop % 60 == 0:
                 time_loop = 5
@@ -412,8 +412,9 @@ def start():
     threading.Thread(name="mouse thread", target=mouse_listen, args=()).start()
     threading.Thread(name="per second tracker", target=per_sec_track, args=(kill,)).start()
     threading.Thread(name="url flush thread", target=url_grabber_new.flush_data, args=(kill,)).start()
-    threading.Thread(name="eye tracker thread", target=video_monitor .run_eye_tracker, args=(kill, db_path,)).start()
-    threading.Thread(name="eye tracker thread", target=video_monitor_main, args=(kill,)).start()
+    if options["disable_attention"] == "0":
+        threading.Thread(name="eye tracker thread", target=video_monitor.run_eye_tracker, args=(kill, db_path,)).start()
+        threading.Thread(name="eye tracker thread", target=video_monitor_main, args=(kill,)).start()
 
     running = 1
     return

@@ -8,14 +8,20 @@ prev_key = ''
 exclude_log = ['Explorer', 'Searchui', 'Task Switching', '', ' ']  # these are excluded apps
 words = ''
 words_new = ''
+shortcuts = {"c": 0, "v": 0}
 
 
 def start(program_name, process, window, ctrl_pressed, key=None, x=None):
-    global prev_window_keylogger, prev_app_keylogger, prev_process_keylogger, prev_key, exclude_log, words, words_new
+    global prev_window_keylogger, prev_app_keylogger, prev_process_keylogger, prev_key, exclude_log, words, words_new, shortcuts
 
     if program_name not in exclude_log:
         if len(key) == 1:
             if ctrl_pressed:
+                try:
+                    shortcuts[key] += 1
+                except Exception:
+                    shortcuts[key] = 1
+
                 words += " <SHORTCUT> "
             else:
                 words += key
@@ -82,7 +88,7 @@ def push_data(db_path):
             len_words = str(count_words(words_c))
             words_c = prefix + words_c
             query2 = "INSERT INTO key_logger(window, p_name, d, t, content, characters) VALUES('" + prev_window_keylogger + "','" + prev_app_keylogger + "','" + date_d + "','" + time_t + "','" + words_c + "','" + len_words + "')"
-        print("LOGGED - " + words_c)
+        # print("LOGGED - " + words_c)
         my_cursor.execute(query2)
         connection.commit()
         words = ""
@@ -99,7 +105,7 @@ def count_words(sentence):
 
 
 def push_data_new(db_path):
-    global words, prev_window_keylogger, prev_app_keylogger, words_new, prev_window_keylogger
+    global words, prev_window_keylogger, prev_app_keylogger, words_new, prev_window_keylogger, shortcuts
     words_c = words_new
 
     if len(words_c) > 0:
@@ -111,18 +117,32 @@ def push_data_new(db_path):
         my_cursor = connection.cursor()
 
         try:
+            try:
+                copy = shortcuts["c"]
+            except Exception:
+                copy = 0
+
+            try:
+                paste = shortcuts["v"]
+            except Exception:
+                paste = 0
+
             if len(words_c) > 0:
                 len_words = str(count_words(words_c))
                 prefix = '\n\n= TIME - ' + time_t + ' == WINDOW - ' + prev_window_keylogger + ' =\n'
                 words_c = prefix + words_c
-                query2 = "INSERT INTO key_logger_new(window, p_name, d, t, content, characters) VALUES('" + prev_window_keylogger + "','" + prev_app_keylogger + "','" + date_d + "','" + time_t + "','" + words_c + "','" + len_words + "')"
+                query2 = "INSERT INTO key_logger_new(window, p_name, d, t, content, characters, copy, paste) VALUES('" + prev_window_keylogger + "','" + prev_app_keylogger + "','" + date_d + "','" + time_t + "','" + words_c + "','" + len_words + "','" + str(copy) + "','" + str(paste) + "')"
             else:
                 pass
         except Exception as e:
             print(e)
-        print("LOGGED NEW - " + words_c)
+        # print("LOGGED NEW - " + words_c)
         my_cursor.execute(query2)
         connection.commit()
         words_new = ""
+        shortcuts = {"c": 0, "v": 0}
 
     return
+
+
+

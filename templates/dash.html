@@ -177,6 +177,17 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row mt-3">
+                                    <div class="col-lg-12">
+                                        <div class="abc-checkbox abc-checkbox-primary col-lg-12">
+                                            <input class="form-check-input" id="disable_attention" type="checkbox"
+                                                   {% if disable_attention %}checked{% endif %}>
+                                            <label class="form-check-label" for="disable_attention">
+                                                Disable Attention/Video/Audio Monitoring
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                                 <hr>
                                 <div class="row">
                                     <div class="col-lg-12">
@@ -979,6 +990,40 @@
                 success: function () {
                     nativeToast({
                         message: 'Saved',
+                        position: 'bottom',
+                        timeout: 1500,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        }
+    });
+
+    $('#disable_attention').change(function () {
+        if ($('#disable_attention').is(":checked")) {
+            $.ajax({
+                url: "/tracker/check_disable_attention",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Settings will be applied when you start monitoring the next time',
+                        position: 'bottom',
+                        timeout: 3000,
+                        type: 'success',
+                        edge: true
+                    })
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/tracker/uncheck_disable_attention",
+                method: "POST",
+                data: {},
+                success: function () {
+                    nativeToast({
+                        message: 'Settings will be applied when you start monitoring the next time',
                         position: 'bottom',
                         timeout: 1500,
                         type: 'success',

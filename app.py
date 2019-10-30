@@ -52,7 +52,8 @@ options = {
     'delete_30': '0',
     'autostart': '0',
     'disable_ss': '0',
-    'disable_keylog': '0'
+    'disable_keylog': '0',
+    'disable_attention': '0'
 }
 
 if activity_tracker.AUTORUN_WINDOWS == 1:
@@ -65,7 +66,8 @@ app = Flask(__name__, static_folder=absolute_path + '/static', template_folder=a
 def dash():
     return render_template('dash.html', autorun=int(options['autorun']), auto_win=int(options['autostart']),
                            delete_30=int(options['delete_30']), disable_ss=int(options['disable_ss']),
-                           disable_keylog=int(options['disable_keylog']), exclude=exclude_apps, port=PORT)
+                           disable_keylog=int(options['disable_keylog']),
+                           disable_attention=int(options['disable_attention']), exclude=exclude_apps, port=PORT)
 
 
 @app.route('/dash/<string:date>', methods=['GET', 'POST'])
@@ -79,6 +81,7 @@ def dash_with_date(date):
     return render_template('dash.html', date=date, no_data=no_data, autorun=int(options['autorun']),
                            auto_win=int(options['autostart']), delete_30=int(options['delete_30']),
                            disable_ss=int(options['disable_ss']), disable_keylog=int(options['disable_keylog']),
+                           disable_attention=int(options['disable_attention']),
                            exclude=exclude_apps, port=PORT)
 
 
@@ -401,6 +404,22 @@ def tracker(command):
         conn = sqlite3.connect(db_path)
         c = conn.cursor()
         c.execute('INSERT OR REPLACE INTO options ("op_name", "op_value") VALUES ("disable_keylog", "0")')
+        conn.commit()
+        load_options()
+        return 'done'
+
+    elif command == 'check_disable_attention':
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute('INSERT OR REPLACE INTO options ("op_name", "op_value") VALUES ("disable_attention", "1")')
+        conn.commit()
+        load_options()
+        return 'done'
+
+    elif command == 'uncheck_disable_attention':
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute('INSERT OR REPLACE INTO options ("op_name", "op_value") VALUES ("disable_attention", "0")')
         conn.commit()
         load_options()
         return 'done'

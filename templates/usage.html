@@ -364,13 +364,17 @@
                                                     <div class="card">
                                                         {% for key, value in apps_hour_words.items() %}
                                                             <div class="card-header" id="{{ value[0] }}-heading">
-                                                        <span class="btn-link" style="cursor: pointer"
-                                                              data-toggle="collapse"
-                                                              data-target="#{{ value[0] }}-collapse"
-                                                              aria-expanded="false"
-                                                              aria-controls="{{ value[0] }}-collapse">
-                                                            {{ key }}
-                                                        </span>
+                                                                <span class="btn-link" style="cursor: pointer"
+                                                                      data-toggle="collapse"
+                                                                      data-target="#{{ value[0] }}-collapse"
+                                                                      aria-expanded="false"
+                                                                      aria-controls="{{ value[0] }}-collapse">
+                                                                    {{ key }}
+                                                                </span>
+                                                                <br>
+                                                                <label style="margin-bottom: 0; font-size: 0.8rem; color: grey;">
+                                                                    Shortcuts - Ctrl + C : {{ value[3] }}, Ctrl + V : {{ value[4] }}
+                                                                </label>
                                                             </div>
                                                             <div id="{{ value[0] }}-collapse" class="collapse"
                                                                  aria-labelledby="{{ value[0] }}-heading"
@@ -1254,8 +1258,7 @@
         let slot = $("#slot_select").val();
         if (slot === "0") {
             alert("Please choose a time slot");
-        }
-        else {
+        } else {
             window.location.replace(window.location.origin + "/usage/{{ date }}/" + slot)
         }
     })

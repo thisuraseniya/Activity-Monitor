@@ -607,11 +607,13 @@ def get_hourly_keystrokes(db_path, date, slot):
         app = str(row[2])
         word_count = int(row[6])
         content = row[5]
+        copy = int(row[7])
+        paste = int(row[8])
         id = "_".join(app.split(" "))
         if app in app_words:
-            app_words[app] = (id, app_words[app][1] + "\n" + content, int(app_words[app][2]) + word_count)
+            app_words[app] = (id, app_words[app][1] + "\n" + content, app_words[app][2] + word_count, app_words[app][3] + copy, app_words[app][4] + paste )
         else:
-            app_words[app] = (id, content, word_count)
+            app_words[app] = (id, content, word_count, copy, paste)
 
     print(app_words)
     return app_words
