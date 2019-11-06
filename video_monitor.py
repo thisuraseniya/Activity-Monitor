@@ -10,7 +10,7 @@ has_youtube = 0
 
 def set_youtube(yt):
     global has_youtube
-    print("Has youtube", yt)
+    # print("Has youtube", yt)
     has_youtube = yt
 
 

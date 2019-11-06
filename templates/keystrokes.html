@@ -113,7 +113,7 @@
                     Keystrokes -
                     <small class="text-muted">Click on the app name to view what you typed</small>
                 </div>
-                <div class="card-body" id="key_card">
+                <div class="card-body" id="key_card2">
                     {% if key_data %}
                         <div class="row text-right">
                             <div class="col-lg-12">
@@ -156,6 +156,61 @@
                                          data-parent="#accordionExample">
                                         <div class="card-body">
                                             <pre style="white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ row[5] }}</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <center class="small text-muted"><i class="fas fa-times-circle text-danger"></i> No data to be
+                            displayed
+                        </center>
+                    {% endif %}
+                </div>
+                <div class="card-footer small text-muted update"></div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <i class="fas fa-keyboard"></i>
+                    Clipboard Data -
+                    <small class="text-muted">View what you copied</small>
+                </div>
+                <div class="card-body" id="key_card">
+                    {% if clipboard_data %}
+                        <div class="row text-right">
+                            <div class="col-lg-12">
+                                <button id="delete_all_clipboard" date="{{ date }}" type="button"
+                                        class="btn btn-outline-danger" aria-label="Delete All Records">
+                                    <i class="fas fa-trash-alt"></i>
+                                    Delete all
+                                </button>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="accordion" id="accordionClipboard">
+                            {% for row in clipboard_data %}
+                                {% set row_id = "clip-" + (row[0] | string) %}
+                                <div class="card" id="card{{ row_id }}">
+                                    <div>
+                                        <div class="card-header" id="headingOne">
+                                            <div class="row">
+                                                <div style="cursor: pointer" class="col-11" data-toggle="collapse"
+                                                     data-target="#collapse{{ row_id }}" aria-expanded="true"
+                                                     aria-controls="collapse{{ row_id }}">
+                                                    <b>{{ row[1] }}</b>
+                                                    <br>
+                                                    <small class="text-muted">Show more
+                                                        <i class="fas fa-angle-down"></i></small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="collapse{{ row_id }}" class="collapse" aria-labelledby="headingOne"
+                                         data-parent="#accordionClipboard">
+                                        <div class="card-body">
+                                            <pre style="white-space: pre-wrap; white-space: -moz-pre-wrap; white-space: -pre-wrap; white-space: -o-pre-wrap; word-wrap: break-word;">{{ row[2] }}</pre>
                                         </div>
                                     </div>
                                 </div>
@@ -317,6 +372,24 @@
             $('#delete_all_keystrokes').html('<span class="spinner-grow spinner-grow-sm text-danger"></span> Deleting...')
             $.ajax({
                 url: "/tracker/delete_all_keystrokes",
+                method: "POST",
+                data: {date: date},
+                success: function () {
+                    window.location.reload();
+                }
+            });
+        }
+
+    });
+
+    $('#delete_all_clipboard').click(function (event) {
+        var date = jQuery(this).attr("date");
+        var r = confirm("You are about to delete all the clipboard data.\nThis action cannot be undone.\n\nProceed?");
+        if (r == true) {
+            $('#delete_all_clipboard').attr('disabled', 'true')
+            $('#delete_all_clipboard').html('<span class="spinner-grow spinner-grow-sm text-danger"></span> Deleting...')
+            $.ajax({
+                url: "/tracker/delete_all_clipboard",
                 method: "POST",
                 data: {date: date},
                 success: function () {

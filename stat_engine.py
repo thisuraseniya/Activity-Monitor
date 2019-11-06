@@ -669,3 +669,42 @@ def get_hourly_urls(db_path, date, slot):
     return url
 
 
+def give_clipboard_data(db_path, date):
+    clipboard = {}
+    clipboard_data_list = []
+    row_id = 0
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute('SELECT * FROM clipboard_monitor WHERE d="' + date + '" ORDER BY t')
+    data = c.fetchall()
+
+    for row in data:
+        app = row[4]
+        t = row[2]
+        content = row[3]
+        if app in clipboard:
+            clipboard[app] = clipboard[app] + t + " ===================\n" + content + "\n\n"
+        else:
+            clipboard[app] = t + " ===================\n" + content + "\n\n"
+
+    for record in clipboard:
+        clipboard_data_list.append((row_id, record, clipboard[record]))
+        row_id += 1
+
+    return clipboard_data_list
+
+
+def give_keylogger_data(db_path, date):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute('SELECT * FROM key_logger WHERE d="' + date + '"')
+    data = c.fetchall()
+    return data
+
+
+def give_network_data(db_path, date):
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
+    c.execute('SELECT * FROM network_monitor WHERE d="' + date + '"')
+    data = c.fetchall()
+    return data

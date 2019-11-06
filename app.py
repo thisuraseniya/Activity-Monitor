@@ -163,13 +163,14 @@ def statistics(date):
     total_usage, first_app, second_app, third_app, final_browsers = stat_engine.app_stats(db_path, date)
     word_count = stat_engine.give_word_count(db_path, date)
     url_data = stat_engine.give_url_data(db_path, date)
+    network_data = stat_engine.give_network_data(db_path, date)
     if total_usage == '0 seconds':
         no_data = 1
     else:
         no_data = 0
     return render_template('statistics.html', date=date, downloads=downloads, browsers=final_browsers,
                            first_app=first_app, second_app=second_app, third_app=third_app, total_usage=total_usage,
-                           word_count=word_count, refresh=refresh, no_data=no_data, url_data=url_data)
+                           word_count=word_count, refresh=refresh, no_data=no_data, url_data=url_data, network_data=network_data)
 
 
 @app.errorhandler(404)
@@ -225,6 +226,8 @@ def tracker(command):
                     c.execute('DELETE FROM key_logger_new')
                     c.execute('DELETE FROM url_data')
                     c.execute('DELETE FROM video_monitor')
+                    c.execute('DELETE FROM clipboard_monitor')
+                    c.execute('DELETE FROM network_monitor')
                     exclude_apps = []
                 except Exception as e:
                     print(e)
@@ -268,7 +271,8 @@ def tracker(command):
                 c.execute('DELETE FROM key_logger_new WHERE d = "' + date_received + '"')
                 c.execute('DELETE FROM url_data WHERE d = "' + date_received + '"')
                 c.execute('DELETE FROM video_monitor WHERE d = "' + date_received + '"')
-                c.execute('DELETE FROM test')
+                c.execute('DELETE FROM clipboard_monitor WHERE d = "' + date_received + '"')
+                c.execute('DELETE FROM network_monitor WHERE d = "' + date_received + '"')
                 conn.commit()
                 out = '1'
             else:
@@ -482,6 +486,24 @@ def tracker(command):
 
         return 'deleted'
 
+    elif command == "delete_all_clipboard":
+        restart_after_delete = 0
+
+        if isTrackerRunning == 1:
+            restart_after_delete = 1
+            requests.get("http://127.0.0.1:" + s_PORT + "/tracker/stop_tracker")
+
+        date = request.form['date']
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute('DELETE FROM clipboard_monitor WHERE d="' + date + '"')
+        conn.commit()
+
+        if restart_after_delete == 1:
+            requests.get("http://127.0.0.1:" + s_PORT + "/tracker/start_tracker")
+
+        return 'deleted'
+
     elif command == "add_exclude_app":
         app_rec = request.form['app'].lower()
         if app_rec not in exclude_apps:
@@ -553,12 +575,11 @@ def tracker(command):
 
 @app.route('/keystrokes/<string:date>', methods=['GET', 'POST'])
 def keystrokes(date):
-    global refresh
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
-    c.execute('SELECT * FROM key_logger WHERE d="' + date + '"')
-    data = c.fetchall()
-    return render_template('keystrokes.html', key_data=data, date=date, refresh=refresh)
+    global refresh, db_path
+    key_data = stat_engine.give_keylogger_data(db_path, date)
+    clipboard_data = stat_engine.give_clipboard_data(db_path, date)
+    return render_template('keystrokes.html', key_data=key_data, clipboard_data=clipboard_data, date=date,
+                           refresh=refresh)
 
 
 @app.route('/EULA', methods=['GET', 'POST'])
@@ -633,8 +654,11 @@ def q():
     global i
     print("Quitting")
     time.sleep(2)
-    for nid in i:
-        zroya.hide(nid)
+    try:
+        for nid in i:
+            zroya.hide(nid)
+    except Exception as er:
+        print(er)
     os._exit(0)
 
 

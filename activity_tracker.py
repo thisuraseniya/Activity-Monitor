@@ -14,6 +14,8 @@ import key_log
 import ctypes
 import url_grabber_new
 import video_monitor
+import clipboard_monitor
+import network_monitor
 
 
 hllDll = ctypes.WinDLL("User32.dll")
@@ -130,6 +132,8 @@ def create_database():
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS eye_tracker ( id INTEGER PRIMARY KEY, d TEXT, t TEXT, no_video INTEGER, face INTEGER, eyes INTEGER)''')
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS url_data ( id INTEGER PRIMARY KEY, url TEXT, start_t TEXT, end_t TEXT, t INTEGER, d TEXT)''')
         my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS video_monitor ( id INTEGER PRIMARY KEY, d TEXT, t TEXT )''')
+        my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS clipboard_monitor ( id INTEGER PRIMARY KEY, d TEXT, t TEXT, content TEXT, app TEXT )''')
+        my_cursor_ini.execute('''CREATE TABLE IF NOT EXISTS network_monitor ( id INTEGER PRIMARY KEY, d TEXT, download TEXT, upload TEXT )''')
         connection_ini.commit()
         print("====== CREATING DATABASE COMPLETE")
     return
@@ -208,7 +212,6 @@ def track():
 
         program_name, process, window, BROWSER_FLAG = names_gen.find_app_name()
 
-        print("FLAG ", BROWSER_FLAG)
         prev_window = window
 
         d = datetime.datetime.now()
@@ -408,10 +411,12 @@ def start():
     threading.Thread(name="folder thread", target=folder, args=(kill,)).start()
     threading.Thread(name="persistent thread", target=persistent, args=(kill,)).start()
     threading.Thread(name="storage watcher", target=storage_watcher.start, args=(kill, db_path,)).start()
+    threading.Thread(name="clipboard monitor", target=clipboard_monitor.monitor_clipboard, args=(kill, db_path,)).start()
     threading.Thread(name="kb thread", target=kb_listen, args=()).start()
     threading.Thread(name="mouse thread", target=mouse_listen, args=()).start()
     threading.Thread(name="per second tracker", target=per_sec_track, args=(kill,)).start()
     threading.Thread(name="url flush thread", target=url_grabber_new.flush_data, args=(kill,)).start()
+    threading.Thread(name="network monitor", target=network_monitor.push_data, args=(kill, db_path,)).start()
     if options["disable_attention"] == "0":
         threading.Thread(name="eye tracker thread", target=video_monitor.run_eye_tracker, args=(kill, db_path,)).start()
         threading.Thread(name="eye tracker thread", target=video_monitor_main, args=(kill,)).start()

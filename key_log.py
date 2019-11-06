@@ -29,8 +29,10 @@ def start(program_name, process, window, ctrl_pressed, key=None, x=None):
             if key == "Key.space":
                 words += " "
             elif key == "Key.backspace" or key == "Key.delete":
-                if prev_key != "Key.backspace" and prev_key != "Key.delete":
+                if prev_key != "Key.delete":
                     words += " <DELETE> "
+                if prev_key != "Key.backspace":
+                    words += " <BACKSPACE> "
                 else:
                     pass
             elif key == "Key.enter":

@@ -175,7 +175,7 @@
                 <div class="col-lg-8">
                     <div class="card mb-3">
                         <div class="card-header">
-                            <i class="fas fa-window-maximize"></i>
+                            <i class="fas fa-sitemap"></i>
                             Website Visits
                         </div>
                         <div class="card-body">
@@ -197,6 +197,33 @@
                     </div>
                 </div>
                 <div class="col-lg-4">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <i class="fas fa-wifi"></i>
+                            Network Usage
+                        </div>
+                        <div class="card-body">
+                            {% if no_data == 1 %}
+                                <center class="small text-muted"><i class="fas fa-times-circle text-danger"></i> No data
+                                    to be displayed
+                                </center>{% endif %}
+                            <ul class="list-group list-group-flush">
+                                {% if network_data %}
+                                    {% for row in network_data %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div><i class="fas fa-cloud-download-alt"></i> <b>Download</b> </div>
+                                            <div>{{ row[2] | float | round(2, 'floor') }} MB</div>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div><i class="fas fa-cloud-upload-alt"></i> <b>Upload</b></div>
+                                            <div>{{ row[3] | float | round(2, 'floor') }} MB</div>
+                                        </li>
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                        <div class="card-footer small text-muted update"></div>
+                    </div>
                     <div class="card mb-3">
                         <div class="card-header">
                             <i class="fas fa-file-download"></i>
