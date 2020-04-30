@@ -1,5 +1,6 @@
 import checker
 from flask import Flask, render_template, request, send_from_directory
+from flask_cors import CORS
 import sqlite3
 import activity_tracker
 from infi.systray import SysTrayIcon
@@ -60,6 +61,7 @@ if activity_tracker.AUTORUN_WINDOWS == 1:
     options['autostart'] = '1'
 
 app = Flask(__name__, static_folder=absolute_path + '/static', template_folder=absolute_path + '/templates')
+CORS(app)
 
 
 @app.route('/', methods=['GET', 'POST'])
