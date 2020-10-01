@@ -9,3 +9,5 @@ For .exe with console use `pyinstaller -F -c --icon=favicon.ico ./app.py`
 For .exe without console use `pyinstaller -F -w --icon=favicon.ico ./app.py`
 
 Install the [extension](https://github.com/thisuraseniya/Activity-Monitor-Extension) to collect URL data
+
+Activity Monitor is built with ❤ using Flask, SQLite, jQuery, HTML and Bootstrap.
