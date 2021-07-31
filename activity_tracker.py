@@ -63,9 +63,12 @@ if len(parts) < 2:
     parts = path.split("/")
 parts.pop()
 absolute_path = "/".join(parts)
+
+if absolute_path == "":
+    absolute_path = os.getcwd()
+
 print("Absolute path - " + absolute_path)
 print('====== COMPLETE')
-
 
 # ============ End Check Registry ===============
 

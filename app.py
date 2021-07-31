@@ -725,47 +725,47 @@ def on_action(notification_id, action_id):
 
 # =============== MAIN PROGRAM ===================
 
-menu_options = (
-    ("Open Dashboard", absolute_path + "/static/dash.ico", open_dashboard), ("Start Tracker", None, start_tracker),
-    ("Stop Tracker", None, stop_tracker))
-tray = SysTrayIcon(absolute_path + "/static/favicon.ico", "Activity Monitor", menu_options, on_quit)
-tray.start()
-load_options()
-
-try:
-    if options['delete_30'] == '1':
-        print('')
-        print('====== CLEANING OLDER RECORDS')
-        conn = sqlite3.connect(db_path)
-        c = conn.cursor()
-        c.execute("DELETE FROM key_logger WHERE d <= date('now','-30 day')")
-        c.execute("DELETE FROM tracker WHERE d <= date('now','-30 day')")
-        c.execute("DELETE FROM downloads WHERE d <= date('now','-30 day')")
-        conn.commit()
-        now = time.time()
-        before_30 = now - 30 * 86400
-        if os.path.exists(ss_path):
-            for f in os.listdir(ss_path):
-                if os.stat(os.path.join(ss_path, f)).st_mtime < before_30:
-                    shutil.rmtree(ss_path + f)
-                    print("Deleting folder - " + f)
-        print('====== CLEANING COMPLETED')
-        print('')
-
-    if options['autorun'] == '1':
-        if options['eula'] == '0' or options['eula'] is None:
-            notify("Monitoring did not start automatically",
-                   "Please open the Dashboard and start manually\n(Reason - EULA not accepted)", 0)
-        else:
-            activity_tracker.start()
-            isTrackerRunning = 1
-            notify("Activity Monitor successfully started", "Minimized to system tray", 0)
-
-except Exception as e:
-    print(e)
-    notify("Activity Monitor successfully started", "Minimized to system tray", 0)
-
-time.sleep(1)
-
 if __name__ == '__main__':
+    menu_options = (
+        ("Open Dashboard", absolute_path + "/static/dash.ico", open_dashboard), ("Start Tracker", None, start_tracker),
+        ("Stop Tracker", None, stop_tracker))
+    tray = SysTrayIcon(absolute_path + "/static/favicon.ico", "Activity Monitor", menu_options, on_quit)
+    tray.start()
+    load_options()
+
+    try:
+        if options['delete_30'] == '1':
+            print('')
+            print('====== CLEANING OLDER RECORDS')
+            conn = sqlite3.connect(db_path)
+            c = conn.cursor()
+            c.execute("DELETE FROM key_logger WHERE d <= date('now','-30 day')")
+            c.execute("DELETE FROM tracker WHERE d <= date('now','-30 day')")
+            c.execute("DELETE FROM downloads WHERE d <= date('now','-30 day')")
+            conn.commit()
+            now = time.time()
+            before_30 = now - 30 * 86400
+            if os.path.exists(ss_path):
+                for f in os.listdir(ss_path):
+                    if os.stat(os.path.join(ss_path, f)).st_mtime < before_30:
+                        shutil.rmtree(ss_path + f)
+                        print("Deleting folder - " + f)
+            print('====== CLEANING COMPLETED')
+            print('')
+
+        if options['autorun'] == '1':
+            if options['eula'] == '0' or options['eula'] is None:
+                notify("Monitoring did not start automatically",
+                       "Please open the Dashboard and start manually\n(Reason - EULA not accepted)", 0)
+            else:
+                activity_tracker.start()
+                isTrackerRunning = 1
+                notify("Activity Monitor successfully started", "Minimized to system tray", 0)
+
+    except Exception as e:
+        print(e)
+        notify("Activity Monitor successfully started", "Minimized to system tray", 0)
+
+    time.sleep(1)
+
     app.run(port=PORT)
