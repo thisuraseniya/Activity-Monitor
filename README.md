@@ -19,9 +19,9 @@ Windows\
 Windows\
 `venv\Scripts\activate`
     
-    On Windows, it may be required to set the execution policy for the user.
-    You can do this by issuing the following PowerShell command:
-    PS C:> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+On Windows, it may be required to set the execution policy for the user.
+You can do this by issuing the following PowerShell command:
+PS C:> Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 
 ### Install modules
